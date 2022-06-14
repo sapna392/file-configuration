@@ -68,9 +68,9 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	public String upload(MultipartFile file, String imCode) throws VendorBulkUploadException {
 
 		try {
-			if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+			if (!(FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
 					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())
-					|| FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType())) {
+					|| FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType()))) {
 				throw new VendorBulkUploadException(ErrorCode.INVALID_FILE_TYPE);
 			}
 			if (file.isEmpty()) {
