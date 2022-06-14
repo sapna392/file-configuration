@@ -19,12 +19,13 @@ public class FileConfigurationEntity extends AbstractEntity {
 	
 	public FileConfigurationEntity() {}
 
-	public FileConfigurationEntity(String fileDelimiter, String invoiceNumber, String invoiceAmount, String invoiceDate,
-			String vendorCode, String vendorName, String dueDate, String paymentIdentifier, String processingDate,
-			String additionalField1, String additionalField2, String additionalField3, String additionalField4,
-			String additionalField5, String additionalField6, String additionalField7, String additionalField8,
-			String additionalField9, String additionalField10) {
+	public FileConfigurationEntity(String fileStructure, String fileDelimiter, String invoiceNumber, 
+			String invoiceAmount, String invoiceDate, String vendorCode, String vendorName, String dueDate, 
+			String paymentIdentifier, String processingDate, String additionalField1, String additionalField2, 
+			String additionalField3, String additionalField4, String additionalField5, String additionalField6, 
+			String additionalField7, String additionalField8, String additionalField9, String additionalField10) {
 		super();
+		this.fileStructure = fileStructure;
 		this.fileDelimiter = fileDelimiter;
 		this.invoiceNumber = invoiceNumber;
 		this.invoiceAmount = invoiceAmount;
@@ -60,7 +61,6 @@ public class FileConfigurationEntity extends AbstractEntity {
 	@Column(name = "FILE_STRUCT", nullable = false)
 	private String fileStructure;
 
-	@JsonProperty("File Delimiter")
 	@Column(name = "FILE_DLMTR")
 	private String fileDelimiter;
 

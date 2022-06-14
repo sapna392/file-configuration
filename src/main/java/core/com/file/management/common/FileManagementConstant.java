@@ -7,9 +7,8 @@ public class FileManagementConstant {
 
 	public static final String SUCCESS = "success";
 	public static final String FAILURE = "failure";
-	public static final String FILE_STRUCTURE = "FILE_STRUCTURE";
-	public static final String DELIMITER = "delimiterField";
-	public static final String FILE_DELIMITER = "File Delimiter";
+	public static final String FILE_CONFIG_STRUCTURE = "fileStructure";
+	public static final String FILE_CONFIG_DELIMITER = "fileDelimiter";
 	public static final String FIXED = "fixed";
 	public static final String COMMA = ",";
 	public static final String PIPE = "|";

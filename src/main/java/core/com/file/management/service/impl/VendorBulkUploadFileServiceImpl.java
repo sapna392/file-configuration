@@ -80,10 +80,10 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			if (fileConfigurationEntity == null) {
 				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 			}
-			if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
-					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())
+			if ((FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType()))
 							&& FileManagementConstant.FIXED.equals(fileConfigurationEntity.getFileStructure())) {
-				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
+				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
 			}
 
 			List<String> contentList = null;
@@ -100,14 +100,18 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			contentList = contentList.stream().filter(cl -> StringUtils.isNotEmpty(cl)).collect(Collectors.toList());
 			VendorTxnInvoiceRest vendorTxnInvcRest = null;
 			Map<String, String> configMap = objectMapper.convertValue(fileConfigurationEntity, Map.class);
+			configMap.remove(FileManagementConstant.FILE_CONFIG_DELIMITER);
+			configMap.remove(FileManagementConstant.FILE_CONFIG_STRUCTURE);
 			if (FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType())) {
 				for (String content : contentList) {
 					Map<String, String> contentMap = new HashMap<>();
-					if (FileManagementConstant.DELIMITER.equals(fileConfigurationEntity.getFileStructure())) {
+					if (FileManagementConstant.FILE_CONFIG_DELIMITER
+							.equals(fileConfigurationEntity.getFileStructure())) {
 						if (!content.contains(fileConfigurationEntity.getFileDelimiter())) {
 							throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
 						} else {
-							contentMap = mapBulkUploadFields(content, fileConfigurationEntity, configMap);
+							contentMap = mapBulkUploadFields(content, fileConfigurationEntity.getFileDelimiter(),
+									configMap);
 						}
 						vendorTxnInvcRest = objectMapper.convertValue(contentMap, VendorTxnInvoiceRest.class);
 						vendorTxnInvoiceValidator.validateUploadedFile(vendorTxnInvcRest);
@@ -135,7 +139,8 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			} else if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
 					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())) {
 				for (String content : contentList) {
-					Map<String, String> contentMap = mapBulkUploadFields(content, fileConfigurationEntity, configMap);
+					Map<String, String> contentMap = mapBulkUploadFields(content, FileManagementConstant.COMMA,
+							configMap);
 					vendorTxnInvcRest = objectMapper.convertValue(contentMap, VendorTxnInvoiceRest.class);
 					vendorTxnInvoiceValidator.validateUploadedFile(vendorTxnInvcRest);
 					count++;
@@ -247,13 +252,13 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	@Override
 	public InputStream download(String userId, String userType, String mediaType) throws VendorBulkUploadException {
 
-		FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFieldPostion(userId, userType);
+		FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFileConfiguration(userId, userType);
 		if (fileConfigurationEntity != null) {
 			Map<String, String> confifMap = objectMapper.convertValue(fileConfigurationEntity, Map.class);
 			Map<String, Integer> filteredConfigMap = new HashMap<>();
 			for (Map.Entry<String, String> entry : confifMap.entrySet()) {
 				if (StringUtils.isNotBlank(entry.getValue())
-						&& !FileManagementConstant.FILE_DELIMITER.equals(entry.getKey())) {
+						&& !FileManagementConstant.FILE_CONFIG_DELIMITER.equals(entry.getKey())) {
 					if (entry.getValue().contains(FileManagementConstant.PIPE)) {
 						String[] strArr = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER);
 						filteredConfigMap.put(strArr[0], Integer.parseInt(strArr[1]));
@@ -271,7 +276,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 					byteArrayInputStream = fileManagementUtil.writeToCsvFile(sortedConfigMapKeys);
 				} else if (FileManagementConstant.TXT_MIME_TYPE.equals(mediaType)) {
 					byteArrayInputStream = fileManagementUtil.writeToTxtFile(sortedConfigMapKeys,
-							confifMap.get(FileManagementConstant.FILE_DELIMITER));
+							confifMap.get(FileManagementConstant.FILE_CONFIG_DELIMITER));
 				} else if (FileManagementConstant.XLS_MIME_TYPE.equals(mediaType)) {
 					byteArrayInputStream = fileManagementUtil.writeToXlsFile(sortedConfigMapKeys);
 				}
@@ -301,16 +306,17 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 		return workbook;
 	}*/
 
-	private Map<String, String> mapBulkUploadFields(String content, FileConfigurationEntity fileConfigurationEntity,
-			Map<String, String> configMap) {
+	private Map<String, String> mapBulkUploadFields(String content, String delimiter, Map<String, String> configMap) {
 		Map<String, String> contentMap = new HashMap<>();
-		String[] invoiceDetails = content.split(fileConfigurationEntity.getFileDelimiter());
+		String[] invoiceDetails = content.split(delimiter);
 		for (Map.Entry<String, String> entry : configMap.entrySet()) {
-			if (FileManagementConstant.ADDITIONAL_FIELD.contains(entry.getKey()) && entry.getValue() != null) {
-				String[] additionalFields = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER);
-				contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(additionalFields[1])]);
-			} else {
-				contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(entry.getValue())]);
+			if (!entry.getKey().equals(FileManagementConstant.FILE_CONFIG_DELIMITER)) {
+				if (FileManagementConstant.ADDITIONAL_FIELD.contains(entry.getKey()) && entry.getValue() != null) {
+					String[] additionalFields = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER);
+					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(additionalFields[1])]);
+				} else {
+					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(entry.getValue())]);
+				}
 			}
 		}
 		return contentMap;
