@@ -2,8 +2,10 @@ package core.com.file.management.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Date;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.lang3.StringUtils;
 import org.dozer.Mapper;
@@ -76,10 +79,11 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			if (file.isEmpty()) {
 				throw new VendorBulkUploadException(ErrorCode.EMPTY_FILE_CONTENT);
 			}
-			FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFileConfiguration(imCode, "IM");
-			if (fileConfigurationEntity == null) {
+			List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(imCode, "IM");
+			if (CollectionUtils.isEmpty(fileConfigurationEntityList)) {
 				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 			}
+			FileConfigurationEntity fileConfigurationEntity = fileConfigurationEntityList.get(0);
 			if ((FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
 					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType()))
 							&& FileManagementConstant.FIXED.equals(fileConfigurationEntity.getFileStructure())) {
@@ -149,9 +153,15 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			}
 
 			String contentHash = fileManagementUtil.getContentHash(file.getOriginalFilename());
-			String filePath = fileManagementUtil.getFilePath(contentHash, file.getOriginalFilename());
+			String filePath = fileManagementUtil.getFilePath(contentHash);
 			File savedFile = new File(filePath);
-			file.transferTo(savedFile);
+			if(!savedFile.exists())
+				savedFile.mkdirs();
+			savedFile = new File(filePath, file.getOriginalFilename());
+			savedFile.createNewFile();
+			try (OutputStream outStream = new FileOutputStream(savedFile)) {
+			    outStream.write(file.getInputStream().readAllBytes());
+			}
 			/*
 			 * if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())) {
 			 * workbook = createExcelWorkbook(decodedString);
@@ -213,10 +223,10 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	public MultipartFile getUploadFileById(Long id, String userId, String serType) throws VendorBulkUploadException {
 
 		BulkUploadFileEntity uploadFileEntity = bulkUploadFileRepo.getFileById(id, userId);
-		String filePath = fileManagementUtil.getFilePath(uploadFileEntity.getHash(), uploadFileEntity.getName());
+		String filePath = fileManagementUtil.getFilePath(uploadFileEntity.getHash());
 		MultipartFile multipartFile = null;
 		try {
-			File file = new File(filePath);
+			File file = new File(filePath, uploadFileEntity.getName());
 			DiskFileItem fileItem = new DiskFileItem("file", uploadFileEntity.getType(), false, file.getName(),
 					(int) file.length(), file.getParentFile());
 			fileItem.getOutputStream();
@@ -252,9 +262,10 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	@Override
 	public InputStream download(String userId, String userType, String mediaType) throws VendorBulkUploadException {
 
-		FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFileConfiguration(userId, userType);
-		if (fileConfigurationEntity != null) {
-			Map<String, String> confifMap = objectMapper.convertValue(fileConfigurationEntity, Map.class);
+		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(userId,
+				userType);
+		if (CollectionUtils.isNotEmpty(fileConfigurationEntityList)) {
+			Map<String, String> confifMap = objectMapper.convertValue(fileConfigurationEntityList.get(0), Map.class);
 			Map<String, Integer> filteredConfigMap = new HashMap<>();
 			for (Map.Entry<String, String> entry : confifMap.entrySet()) {
 				if (StringUtils.isNotBlank(entry.getValue())

@@ -11,14 +11,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "FILE_UPLOAD_DETAILS")
+@Table(name = "COM_FILE_UPLD_DTLS")
 @Getter @Setter
 public class BulkUploadFileEntity extends AbstractEntity {
 
 	@Id
 	@Column(name = "FILE_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private String id;
+	private Long id;
 	
 	@Column(name = "IM_CODE")
 	private String imCode;

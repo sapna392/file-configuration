@@ -1,13 +1,9 @@
 package core.com.file.management.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,8 +66,10 @@ public class FileConfigurationServiceImpl implements FileConfigurationService {
 			fileConfigurationEntity.setUpdated(new Date());
 		} else {
 			FileConfigurationEntity existingConfigurationEntity = fileConfigurationRepo
-					.getFileConfiguration(configurationRest.getUserId(), configurationRest.getUserType());
+					.getFileConfiguration(configurationRest.getUserId(), configurationRest.getUserType()).get(0);
 			fileConfigurationEntity = mapper.map(existingConfigurationEntity, FileConfigurationEntity.class);
+			fileConfigurationEntity.setUserId(configurationRest.getUserId());
+			fileConfigurationEntity.setUserType(configurationRest.getUserType());
 			fileConfigurationEntity.setFileStructure(configurationRest.getFileStructure());
 			if (FileManagementConstant.DELIMITER.equals(configurationRest.getFileStructure())) {
 				fileConfigurationEntity.setFileDelimiter(configurationRest.getFileDelimiter());
@@ -92,7 +90,7 @@ public class FileConfigurationServiceImpl implements FileConfigurationService {
 		fileConfigurationRepo.save(fileConfigurationEntity);
 
 		FileConfigurationEntity savedFileConfigurationEntity = fileConfigurationRepo
-				.getFileConfiguration(configurationRest.getUserId(), configurationRest.getUserType());
+				.getFileConfiguration(configurationRest.getUserId(), configurationRest.getUserType()).get(0);
 		FileConfigurationRest savedConfigurationRest = mapToFileConfigurationRest(savedFileConfigurationEntity);
 
 		LOGGER.info("Exiting saveFileConfiguration of " + FileConfigurationServiceImpl.class.getName());
@@ -107,10 +105,10 @@ public class FileConfigurationServiceImpl implements FileConfigurationService {
 		// have to validate user for the userId and userType
 
 		FileConfigurationRest configurationRest = null;
-		FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFileConfiguration(userId,
+		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(userId,
 				userType);
-		if (fileConfigurationEntity != null) {
-			configurationRest = mapToFileConfigurationRest(fileConfigurationEntity);
+		if (CollectionUtils.isEmpty(fileConfigurationEntityList)) {
+			configurationRest = mapToFileConfigurationRest(fileConfigurationEntityList.get(0));
 		} else {
 			throw new FileConfigurationException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 		}

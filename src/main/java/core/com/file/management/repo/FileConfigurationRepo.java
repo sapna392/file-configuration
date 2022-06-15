@@ -1,5 +1,7 @@
 package core.com.file.management.repo;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +23,6 @@ public interface FileConfigurationRepo extends JpaRepository<FileConfigurationEn
 			+ "FROM FileConfigurationEntity fce "
 			+ "WHERE fce.userId = :userId and fce.userType = :userType "
 			+ "ORDER BY fce.updated DESC")
-	FileConfigurationEntity getFileConfiguration(@Param("userId") String userId, @Param("userType") String userType);
+	List<FileConfigurationEntity> getFileConfiguration(@Param("userId") String userId, @Param("userType") String userType);
 	
 }

@@ -29,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
@@ -120,9 +119,9 @@ public class FileManagementUtil {
 		return guid;
 	}
 
-	public String getFilePath(String hashKey, String fileName) {
+	public String getFilePath(String hashKey) {
 		String path = hashKey.substring(0, 2) + "/" + hashKey.substring(2, 4) + "/";
-		return ResourceUtils.CLASSPATH_URL_PREFIX + path + fileName;
+		return "src/main/resources/" + path;
 	}
 
 	public ByteArrayInputStream writeToCsvFile(List<String> sortedConfifMapKeys) throws IOException {

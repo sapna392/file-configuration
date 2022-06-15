@@ -1,5 +1,8 @@
 package core.com.file.management.validation;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
@@ -41,7 +44,7 @@ public class VendorTxnInvoiceValidator {
 			throw new VendorBulkUploadException(ErrorCode.PROCESSING_DATE_EARLY, vendorTxnInvcRest.getInvoiceNumber());
 		}
 		
-		if(vendorTxnInvcRest.getProcessingDate().before(new Date())) {
+		if(vendorTxnInvcRest.getProcessingDate().before(java.sql.Date.valueOf(LocalDate.now()))) {
 			throw new VendorBulkUploadException(ErrorCode.EARLIER_PROCESSING_DATE, vendorTxnInvcRest.getInvoiceNumber());
 		}
 

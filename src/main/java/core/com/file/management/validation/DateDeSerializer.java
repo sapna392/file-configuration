@@ -28,10 +28,12 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 	@Override
 	public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 		try {
-			String date = p.readValueAs(String.class);
-			LocalDate.parse(date, DateTimeFormatter.ofPattern("d/MM/uuuu").withResolverStyle(ResolverStyle.STRICT));
-			return new SimpleDateFormat("d/MM/yyyy").parse(date);
-		} catch (IOException | ParseException e) {
+			String dateString = p.readValueAs(String.class);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/uuuu")
+					.withResolverStyle(ResolverStyle.STRICT);
+			LocalDate localDate = LocalDate.parse(dateString, formatter);
+			return java.sql.Date.valueOf(localDate);
+		} catch (IOException e) {
 			throw new IOException(String.format(ErrorCode.INVALID_DATE, p.getCurrentName()));
 		}
 	}
