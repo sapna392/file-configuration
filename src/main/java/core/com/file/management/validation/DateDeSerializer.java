@@ -29,8 +29,8 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 	public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 		try {
 			String date = p.readValueAs(String.class);
-			LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy").withResolverStyle(ResolverStyle.STRICT));
-			return new SimpleDateFormat("dd/MM/yyyy").parse(date);
+			LocalDate.parse(date, DateTimeFormatter.ofPattern("d/MM/uuuu").withResolverStyle(ResolverStyle.STRICT));
+			return new SimpleDateFormat("d/MM/yyyy").parse(date);
 		} catch (IOException | ParseException e) {
 			throw new IOException(String.format(ErrorCode.INVALID_DATE, p.getCurrentName()));
 		}

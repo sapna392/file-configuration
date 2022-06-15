@@ -76,7 +76,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			if (file.isEmpty()) {
 				throw new VendorBulkUploadException(ErrorCode.EMPTY_FILE_CONTENT);
 			}
-			FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFileConfiguration(imCode, null);
+			FileConfigurationEntity fileConfigurationEntity = fileConfigurationRepo.getFileConfiguration(imCode, "IM");
 			if (fileConfigurationEntity == null) {
 				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 			}
@@ -148,8 +148,8 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 				}
 			}
 
-			String contentHash = fileManagementUtil.getContentHash(file.getName());
-			String filePath = fileManagementUtil.getFilePath(contentHash, file.getName());
+			String contentHash = fileManagementUtil.getContentHash(file.getOriginalFilename());
+			String filePath = fileManagementUtil.getFilePath(contentHash, file.getOriginalFilename());
 			File savedFile = new File(filePath);
 			file.transferTo(savedFile);
 			/*
@@ -160,7 +160,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			 */
 			BulkUploadFileEntity bulkUploadFileEntity = new BulkUploadFileEntity();
 			bulkUploadFileEntity.setImCode(imCode);
-			bulkUploadFileEntity.setName(file.getName());
+			bulkUploadFileEntity.setName(file.getOriginalFilename());
 			bulkUploadFileEntity.setStatus(FileManagementConstant.STATUS_PENDING);
 			bulkUploadFileEntity.setType(file.getContentType());
 			bulkUploadFileEntity.setInvoiceCount(count);
@@ -312,11 +312,11 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 		for (Map.Entry<String, String> entry : configMap.entrySet()) {
 			if (!entry.getKey().equals(FileManagementConstant.FILE_CONFIG_DELIMITER)
 					&& StringUtils.isNotBlank(entry.getValue())) {
-				if (FileManagementConstant.ADDITIONAL_FIELD.contains(entry.getKey()) && entry.getValue() != null) {
+				if (FileManagementConstant.ADDITIONAL_DB_FIELDS.contains(entry.getKey()) && entry.getValue() != null) {
 					String[] additionalFields = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER);
-					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(additionalFields[1])]);
+					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(additionalFields[1]) - 1]);
 				} else {
-					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(entry.getValue())]);
+					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(entry.getValue()) - 1]);
 				}
 			}
 		}
