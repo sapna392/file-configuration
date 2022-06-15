@@ -73,7 +73,7 @@ public class FileConfigurationServiceImpl implements FileConfigurationService {
 					.getFileConfiguration(configurationRest.getUserId(), configurationRest.getUserType());
 			fileConfigurationEntity = mapper.map(existingConfigurationEntity, FileConfigurationEntity.class);
 			fileConfigurationEntity.setFileStructure(configurationRest.getFileStructure());
-			if (FileManagementConstant.FILE_CONFIG_DELIMITER.equals(configurationRest.getFileStructure())) {
+			if (FileManagementConstant.DELIMITER.equals(configurationRest.getFileStructure())) {
 				fileConfigurationEntity.setFileDelimiter(configurationRest.getFileDelimiter());
 			}
 			fileConfigurationEntity.setInvoiceNumber(configurationFields.getInvoiceNumber());

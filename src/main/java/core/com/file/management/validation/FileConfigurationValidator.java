@@ -45,7 +45,7 @@ public class FileConfigurationValidator implements Validator {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "userType", ErrorCode.EMPTY_USER_ID, "Invalid configuration");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "fileStructure", ErrorCode.INVALID_FILE_STRUCT,
 				"Invalid configuration");
-		if (FileManagementConstant.FILE_CONFIG_DELIMITER.equals(configurationRest.getFileStructure())) {
+		if (FileManagementConstant.DELIMITER.equals(configurationRest.getFileStructure())) {
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "delimiter", ErrorCode.DELIMITER_REQ,
 					"Invalid configuration");
 		}
@@ -68,7 +68,7 @@ public class FileConfigurationValidator implements Validator {
 					.map(AdditionalConfigField::getConfigPos).collect(Collectors.toList()));
 		}
 
-		if (FileManagementConstant.FILE_CONFIG_DELIMITER.equals(configurationRest.getFileStructure())) {
+		if (FileManagementConstant.DELIMITER.equals(configurationRest.getFileStructure())) {
 			List<Integer> intPosList = posList.stream().map(pos -> {
 				try {
 					return Integer.parseInt(pos);

@@ -9,6 +9,7 @@ public class FileManagementConstant {
 	public static final String FAILURE = "failure";
 	public static final String FILE_CONFIG_STRUCTURE = "fileStructure";
 	public static final String FILE_CONFIG_DELIMITER = "fileDelimiter";
+	public static final String DELIMITER = "delimiterField";
 	public static final String FIXED = "fixed";
 	public static final String COMMA = ",";
 	public static final String PIPE = "|";
@@ -18,6 +19,9 @@ public class FileManagementConstant {
 			List.of("ADDITIONAL_DETAILS_1", "ADDITIONAL_DETAILS_2", "ADDITIONAL_DETAILS_3", "ADDITIONAL_DETAILS_4",
 					"ADDITIONAL_DETAILS_5", "ADDITIONAL_DETAILS_6", "ADDITIONAL_DETAILS_7", "ADDITIONAL_DETAILS_8",
 					"ADDITIONAL_DETAILS_9", "ADDITIONAL_DETAILS_10"));
+	public static final List<String> ADDITIONAL_DB_FIELDS = new ArrayList<String>(List.of("additionalField1",
+			"additionalField2", "additionalField3", "additionalField4", "additionalField5", "additionalField6",
+			"additionalField7", "additionalField8", "additionalField9", "additionalField10"));
 	public static final String TXT_FILE = ".txt";
 	public static final String XLS_FILE = ".xls";
 	public static final String CSV_FILE = ".csv";

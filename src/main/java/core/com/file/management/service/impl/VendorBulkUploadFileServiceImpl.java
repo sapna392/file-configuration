@@ -310,7 +310,8 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 		Map<String, String> contentMap = new HashMap<>();
 		String[] invoiceDetails = content.split(delimiter);
 		for (Map.Entry<String, String> entry : configMap.entrySet()) {
-			if (!entry.getKey().equals(FileManagementConstant.FILE_CONFIG_DELIMITER)) {
+			if (!entry.getKey().equals(FileManagementConstant.FILE_CONFIG_DELIMITER)
+					&& StringUtils.isNotBlank(entry.getValue())) {
 				if (FileManagementConstant.ADDITIONAL_FIELD.contains(entry.getKey()) && entry.getValue() != null) {
 					String[] additionalFields = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER);
 					contentMap.put(entry.getKey(), invoiceDetails[Integer.parseInt(additionalFields[1])]);
