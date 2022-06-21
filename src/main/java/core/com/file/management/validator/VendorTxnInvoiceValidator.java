@@ -1,51 +1,68 @@
 package core.com.file.management.validator;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-import java.util.Date;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import core.com.file.management.common.ErrorCode;
+import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.VendorBulkUploadException;
-import core.com.file.management.model.VendorTxnInvoiceRest;
+import core.com.file.management.model.VendorBulkUploadRest;
 
 @Component
 public class VendorTxnInvoiceValidator {
+	
+	public void validateUploadedFile(MultipartFile file, String fileStructure) throws VendorBulkUploadException {
+		
+		if (!(FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+				|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())
+				|| FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType()))) {
+			throw new VendorBulkUploadException(ErrorCode.INVALID_FILE_TYPE);
+		}
+		if (file.isEmpty()) {
+			throw new VendorBulkUploadException(ErrorCode.EMPTY_FILE_CONTENT);
+		}
+		if ((FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+				|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType()))
+						&& FileManagementConstant.FIXED.equals(fileStructure)) {
+			throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
+		}
+	}
 
-	public void validateUploadedFile(VendorTxnInvoiceRest vendorTxnInvcRest) throws VendorBulkUploadException {
+	public void validateInvoiceDetails(VendorBulkUploadRest vendorBulkUploadRest) throws VendorBulkUploadException {
 
-		if (vendorTxnInvcRest.getInvoiceNumber() == null) {
+		if (vendorBulkUploadRest.getInvoiceNumber() == null) {
 			throw new VendorBulkUploadException(ErrorCode.INVOICE_NUMBER_MISSING);
 		}
-		if (vendorTxnInvcRest.getInvoiceAmount() == null) {
+		if (vendorBulkUploadRest.getInvoiceAmount() == null) {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Invoice amount",
-					vendorTxnInvcRest.getInvoiceNumber());
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
-		if (vendorTxnInvcRest.getInvoiceDate() == null) {
+		if (vendorBulkUploadRest.getInvoiceNumber() == null) {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Invoice date",
-					vendorTxnInvcRest.getInvoiceNumber());
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
-		if (vendorTxnInvcRest.getVendorCode() == null) {
+		if (vendorBulkUploadRest.getVendorCode() == null) {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Vendor code",
-					vendorTxnInvcRest.getInvoiceNumber());
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
-		if (vendorTxnInvcRest.getProcessingDate() == null) {
+		if (vendorBulkUploadRest.getProcessingDate() == null) {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Processing date",
-					vendorTxnInvcRest.getInvoiceNumber());
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
-		if (vendorTxnInvcRest.getDueDate() == null) {
+		if (vendorBulkUploadRest.getDueDate() == null) {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Due date",
-					vendorTxnInvcRest.getInvoiceNumber());
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
 
-		if (vendorTxnInvcRest.getProcessingDate().before(vendorTxnInvcRest.getInvoiceDate())) {
-			throw new VendorBulkUploadException(ErrorCode.PROCESSING_DATE_EARLY, vendorTxnInvcRest.getInvoiceNumber());
+		if (vendorBulkUploadRest.getProcessingDate().before(vendorBulkUploadRest.getInvoiceDate())) {
+			throw new VendorBulkUploadException(ErrorCode.PROCESSING_DATE_EARLY, vendorBulkUploadRest.getInvoiceNumber());
 		}
 		
-		if(vendorTxnInvcRest.getProcessingDate().before(java.sql.Date.valueOf(LocalDate.now()))) {
-			throw new VendorBulkUploadException(ErrorCode.EARLIER_PROCESSING_DATE, vendorTxnInvcRest.getInvoiceNumber());
+		if(vendorBulkUploadRest.getProcessingDate().before(java.sql.Date.valueOf(LocalDate.now()))) {
+			throw new VendorBulkUploadException(ErrorCode.EARLIER_PROCESSING_DATE,
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
 
 	}

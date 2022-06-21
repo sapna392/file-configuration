@@ -1,6 +1,3 @@
-/**
- * created by supro
- */
 package core.com.file.management.model;
 
 import java.io.Serializable;

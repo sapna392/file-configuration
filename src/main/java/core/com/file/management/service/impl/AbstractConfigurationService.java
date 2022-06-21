@@ -4,6 +4,7 @@
 package core.com.file.management.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +12,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 
+import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
+import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.model.AdditionalConfigField;
 
 public class AbstractConfigurationService {
@@ -21,13 +26,10 @@ public class AbstractConfigurationService {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	public Map<String, String> populateEntityAdditionalFields(List<AdditionalConfigField> additionalConfigFieldList,
-			Object fileConfigurationEntity) {
-		Map<String, String> fileConfigEntityMap = objectMapper.convertValue(fileConfigurationEntity, Map.class);
+	public void populateEntityAdditionalFields(List<AdditionalConfigField> additionalConfigFieldList,
+			Object fileConfigurationEntity) throws FileConfigurationException {
+		Map<String, String> fileConfigEntityMap = new HashMap<>();
 		int additionalFieldCount = 1;
-		while (additionalFieldCount <= 10) {
-			fileConfigEntityMap.put(FileManagementConstant.ADDITIONAL_FIELD + additionalFieldCount++, null);
-		}
 		if (CollectionUtils.isNotEmpty(additionalConfigFieldList)) {
 			additionalFieldCount = 1;
 			for (AdditionalConfigField afl : additionalConfigFieldList) {
@@ -39,7 +41,13 @@ public class AbstractConfigurationService {
 						sb.toString());
 			}
 		}
-		return fileConfigEntityMap;
+		ObjectReader objectReader = objectMapper.readerForUpdating(fileConfigurationEntity);
+		try {
+			fileConfigurationEntity = objectReader
+					.readValue(new ObjectMapper().writeValueAsString(fileConfigEntityMap));
+		} catch (JsonProcessingException e) {
+			throw new FileConfigurationException(ErrorCode.FILE_CONFIGURATION_ERROR);
+		} 
 	}
 
 	public List<AdditionalConfigField> getAdditionalConfigList(Map<String, String> configMap) {

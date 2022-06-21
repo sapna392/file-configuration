@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,19 +16,18 @@ import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.model.AdditionalConfigField;
 import core.com.file.management.model.FileConfigurationRest;
-import core.com.file.management.model.ReverseFileConfigurationResponse;
 import core.com.file.management.model.ReverseFileConfigurationRest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class ConfigurationValidator {
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationValidator.class);
 
 	@Autowired
 	private ObjectMapper mapper;
 
 	public void validateFileConfiguration(Object configurationRest) throws FileConfigurationException {
 
-		LOGGER.info("Entering validateFileConfiguration of " + ConfigurationValidator.class.getName());
+		log.info("Entering validateFileConfiguration of " + ConfigurationValidator.class.getName());
 
 		Object configurationField = null;
 		List<AdditionalConfigField> additionalFieldList = null;
@@ -92,7 +89,7 @@ public abstract class ConfigurationValidator {
 			throw new FileConfigurationException(ErrorCode.INVALID_FILE_STRUCT);
 		}
 
-		LOGGER.info("Exiting validateFileConfiguration of " + ConfigurationValidator.class.getName());
+		log.info("Exiting validateFileConfiguration of " + ConfigurationValidator.class.getName());
 	}
 
 }

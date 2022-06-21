@@ -6,8 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.dozer.Mapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +18,12 @@ import core.com.file.management.model.ReverseFileConfigurationFields;
 import core.com.file.management.model.ReverseFileConfigurationRest;
 import core.com.file.management.repo.ReverseFileConfigurationRepo;
 import core.com.file.management.service.ReverseFileConfigurationService;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class ReverseFileConfigurationServiceImpl extends AbstractConfigurationService
 		implements ReverseFileConfigurationService {
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(ReverseFileConfigurationServiceImpl.class);
 
 	@Autowired
 	ReverseFileConfigurationRepo reverseFileConfigurationRepo;
@@ -37,28 +35,24 @@ public class ReverseFileConfigurationServiceImpl extends AbstractConfigurationSe
 	public ReverseFileConfigurationRest saveFileConfiguration(ReverseFileConfigurationRest configurationRest)
 			throws FileConfigurationException {
 
-		LOGGER.info("Entering saveFileConfiguration of " + FileConfigurationServiceImpl.class.getName());
-		// have to validate user for the userId and userType
+		log.info("Entering saveFileConfiguration of " + this.getClass().getSimpleName());
 
 		long count = reverseFileConfigurationRepo.checkIfConfigurationExists(configurationRest.getImCode());
 		ReverseFileConfigurationEntity reverseFileConfigurationEntity = null;
-		Map<String, String> reverseFileConfigEntityMap = null;
 		ReverseFileConfigurationFields configurationFields = configurationRest.getConfigurationFields();
 		if (count == 0) {
 			reverseFileConfigurationEntity = mapper.map(configurationRest, ReverseFileConfigurationEntity.class);
 			mapper.map(configurationFields, reverseFileConfigurationEntity);
 			if (CollectionUtils.isNotEmpty(configurationFields.getAdditionalFieldList())) {
-				reverseFileConfigEntityMap = populateEntityAdditionalFields(
-						configurationFields.getAdditionalFieldList(), reverseFileConfigurationEntity);
-				reverseFileConfigurationEntity = objectMapper.convertValue(reverseFileConfigEntityMap,
-						ReverseFileConfigurationEntity.class);
+				populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
+						reverseFileConfigurationEntity);
 			}
 			reverseFileConfigurationEntity.setCreated(new Date());
 			reverseFileConfigurationEntity.setCreatedBy(configurationRest.getImCode());
 		} else {
-			ReverseFileConfigurationEntity existingConfigurationEntity = reverseFileConfigurationRepo
-					.getReverseFileConfiguration(configurationRest.getImCode()).get(0);
-			reverseFileConfigurationEntity = mapper.map(existingConfigurationEntity,
+			List<ReverseFileConfigurationEntity> existingConfigurationEntityList = reverseFileConfigurationRepo
+					.getReverseFileConfigurationWithoutAdditionalFields(configurationRest.getImCode());
+			reverseFileConfigurationEntity = mapper.map(existingConfigurationEntityList.get(0),
 					ReverseFileConfigurationEntity.class);
 			reverseFileConfigurationEntity.setImCode(configurationRest.getImCode());
 			reverseFileConfigurationEntity.setFileStructure(configurationRest.getFileStructure());
@@ -78,38 +72,36 @@ public class ReverseFileConfigurationServiceImpl extends AbstractConfigurationSe
 			reverseFileConfigurationEntity.setStatusDescription(configurationFields.getStatusDescription());
 			reverseFileConfigurationEntity.setEchequeNo(configurationFields.getEchequeNo());
 			reverseFileConfigurationEntity.setUpdated(new Date());
-			reverseFileConfigEntityMap = populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
+			populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
 					reverseFileConfigurationEntity);
-			reverseFileConfigurationEntity = objectMapper.convertValue(reverseFileConfigEntityMap,
-					ReverseFileConfigurationEntity.class);
 		}
 		reverseFileConfigurationEntity.setUpdated(new Date());
 		reverseFileConfigurationEntity.setUpdatedBy(configurationRest.getImCode());
 
 		reverseFileConfigurationRepo.save(reverseFileConfigurationEntity);
 
-		ReverseFileConfigurationEntity savedReverseFileConfigurationEntity = reverseFileConfigurationRepo
-				.getReverseFileConfiguration(configurationRest.getImCode()).get(0);
+		List<ReverseFileConfigurationEntity> savedReverseFileConfigurationEntityList = reverseFileConfigurationRepo
+				.findByImCode(configurationRest.getImCode());
 		ReverseFileConfigurationRest savedConfigurationRest = mapToFileConfigurationRest(
-				savedReverseFileConfigurationEntity);
+				savedReverseFileConfigurationEntityList.get(0));
 
-		LOGGER.info("Exiting saveFileConfiguration of " + ReverseFileConfigurationServiceImpl.class.getName());
+		log.info("Exiting saveFileConfiguration of " + this.getClass().getSimpleName());
 		return savedConfigurationRest;
 	}
 
 	@Override
 	public ReverseFileConfigurationRest viewFileConfiguration(String imCode) throws NotFoundException {
-		LOGGER.info("Entering viewFileConfiguration of " + ReverseFileConfigurationServiceImpl.class.getName());
-		// have to validate user for the userId and userType
+		
+		log.info("Entering viewFileConfiguration of " + this.getClass().getSimpleName());
 
 		ReverseFileConfigurationRest configurationRest = null;
 		List<ReverseFileConfigurationEntity> reverseFileConfigurationEntityList = reverseFileConfigurationRepo
-				.getReverseFileConfiguration(imCode);
+				.findByImCode(imCode);
 		if (CollectionUtils.isNotEmpty(reverseFileConfigurationEntityList)) {
 			configurationRest = mapToFileConfigurationRest(reverseFileConfigurationEntityList.get(0));
 		}
 
-		LOGGER.info("Exiting viewFileConfiguration of " + ReverseFileConfigurationServiceImpl.class.getName());
+		log.info("Exiting viewFileConfiguration of " + this.getClass().getSimpleName());
 		return configurationRest;
 	}
 

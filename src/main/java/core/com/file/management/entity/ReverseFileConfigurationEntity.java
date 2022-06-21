@@ -3,6 +3,8 @@
  */
 package core.com.file.management.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,6 +23,29 @@ import lombok.Setter;
 public class ReverseFileConfigurationEntity extends AbstractEntity{
 	
 	public ReverseFileConfigurationEntity() {}
+	
+	public ReverseFileConfigurationEntity(String fileStructure, String fileDelimiter, String fileId, String referenceNo, 
+			String creationTime, String reversalDate,String invoiceNumber, String invoiceAmount, String invoiceDate, 
+			String vendorCode, String vendorName, String status, String statusDescription, String echequeNo,
+			Date created, String createdBy) {
+		super();
+		this.fileStructure = fileStructure;
+		this.fileDelimiter = fileDelimiter;
+		this.fileId = fileId;
+		this.referenceNo = referenceNo;
+		this.creationTime = creationTime;
+		this.invoiceNumber = invoiceNumber;
+		this.invoiceAmount = invoiceAmount;
+		this.invoiceDate = invoiceDate;
+		this.reversalDate = reversalDate;
+		this.vendorCode = vendorCode;
+		this.vendorName = vendorName;
+		this.status = status;
+		this.statusDescription = statusDescription;
+		this.echequeNo = echequeNo;
+		this.setCreated(created);
+		this.setCreatedBy(createdBy);
+	}
 
 	public ReverseFileConfigurationEntity(String fileStructure, String fileDelimiter, String fileId, String referenceNo, 
 			String creationTime, String reversalDate,String invoiceNumber, String invoiceAmount, String invoiceDate, 

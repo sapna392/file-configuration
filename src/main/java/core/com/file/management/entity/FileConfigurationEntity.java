@@ -1,5 +1,7 @@
 package core.com.file.management.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,6 +20,24 @@ import lombok.Setter;
 public class FileConfigurationEntity extends AbstractEntity {
 	
 	public FileConfigurationEntity() {}
+	
+	public FileConfigurationEntity(String fileStructure, String fileDelimiter, String invoiceNumber, 
+			String invoiceAmount, String invoiceDate, String vendorCode, String vendorName, String dueDate, 
+			String paymentIdentifier, String processingDate, Date created, String createdBy) {
+		super();
+		this.fileStructure = fileStructure;
+		this.fileDelimiter = fileDelimiter;
+		this.invoiceNumber = invoiceNumber;
+		this.invoiceAmount = invoiceAmount;
+		this.invoiceDate = invoiceDate;
+		this.vendorCode = vendorCode;
+		this.vendorName = vendorName;
+		this.dueDate = dueDate;
+		this.paymentIdentifier = paymentIdentifier;
+		this.processingDate = processingDate;
+		this.setCreated(created);
+		this.setCreatedBy(createdBy);
+	}
 
 	public FileConfigurationEntity(String fileStructure, String fileDelimiter, String invoiceNumber, 
 			String invoiceAmount, String invoiceDate, String vendorCode, String vendorName, String dueDate, 

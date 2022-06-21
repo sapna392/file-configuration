@@ -26,4 +26,17 @@ public interface ReverseFileConfigurationRepo extends JpaRepository<ReverseFileC
 			+ "ORDER BY rfce.updated DESC")
 	List<ReverseFileConfigurationEntity> getReverseFileConfiguration(@Param("imCode") String imCode);
 	
+	@Query("SELECT NEW core.com.file.management.entity.ReverseFileConfigurationEntity ( rfce.fileStructure, "
+			+ "rfce.fileDelimiter, rfce.fileId, rfce.referenceNo, rfce.creationTime, rfce.invoiceNumber, "
+			+ "rfce.invoiceAmount, rfce.reversalDate, rfce.invoiceDate, rfce.vendorCode, rfce.vendorName, "
+			+ "rfce.status, rfce.statusDescription, rfce.echequeNo, rfce.created, rfce.createdBy) "
+			+ "FROM ReverseFileConfigurationEntity rfce "
+			+ "WHERE rfce.imCode = :imCode "
+			+ "ORDER BY rfce.updated DESC")
+	List<ReverseFileConfigurationEntity> getReverseFileConfigurationWithoutAdditionalFields(
+			@Param("imCode") String imCode);
+	
+	@Query("SELECT rfce FROM ReverseFileConfigurationEntity rfce WHERE rfce.imCode =:imCode ORDER BY rfce.updated DESC")
+	List<ReverseFileConfigurationEntity> findByImCode(@Param("imCode") String imCode);
+	
 }

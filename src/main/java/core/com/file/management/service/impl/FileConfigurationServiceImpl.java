@@ -6,15 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.dozer.Mapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.entity.FileConfigurationEntity;
 import core.com.file.management.exception.FileConfigurationException;
@@ -25,11 +22,11 @@ import core.com.file.management.model.FileConfigurationRest;
 import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.service.FileConfigurationService;
 import core.com.file.management.util.FileConfigurationUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class FileConfigurationServiceImpl extends AbstractConfigurationService implements FileConfigurationService {
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(FileConfigurationServiceImpl.class);
 
 	@Autowired
 	FileConfigurationRepo fileConfigurationRepo;
@@ -48,28 +45,23 @@ public class FileConfigurationServiceImpl extends AbstractConfigurationService i
 	public FileConfigurationRest saveFileConfiguration(FileConfigurationRest configurationRest)
 			throws FileConfigurationException {
 
-		LOGGER.info("Entering saveFileConfiguration of " + FileConfigurationServiceImpl.class.getName());
-		// have to validate user for the userId and userType
+		log.info("Entering saveFileConfiguration of " + this.getClass().getSimpleName());
 
 		long count = fileConfigurationRepo.checkIfConfigurationExists(configurationRest.getImCode());
 		FileConfigurationEntity fileConfigurationEntity = null;
-		Map<String, String> fileConfigEntityMap = null;
 		FileConfigurationFields configurationFields = configurationRest.getConfigurationFields();
 		if (count == 0) {
 			fileConfigurationEntity = mapper.map(configurationRest, FileConfigurationEntity.class);
 			mapper.map(configurationFields, fileConfigurationEntity);
 			if (CollectionUtils.isNotEmpty(configurationFields.getAdditionalFieldList())) {
-				
-				fileConfigEntityMap =  populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
-						fileConfigurationEntity);
-				fileConfigurationEntity = objectMapper.convertValue(fileConfigEntityMap, FileConfigurationEntity.class);
+				populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(), fileConfigurationEntity);
 			}
 			fileConfigurationEntity.setCreated(new Date());
 			fileConfigurationEntity.setCreatedBy(configurationRest.getImCode());
 		} else {
-			FileConfigurationEntity existingConfigurationEntity = fileConfigurationRepo
-					.getFileConfiguration(configurationRest.getImCode()).get(0);
-			fileConfigurationEntity = mapper.map(existingConfigurationEntity, FileConfigurationEntity.class);
+			List<FileConfigurationEntity> existingConfigurationEntityList = fileConfigurationRepo
+					.getFileConfigurationWithoutAdditionalFields(configurationRest.getImCode());
+			fileConfigurationEntity = mapper.map(existingConfigurationEntityList.get(0),FileConfigurationEntity.class);
 			fileConfigurationEntity.setImCode(configurationRest.getImCode());
 			fileConfigurationEntity.setFileStructure(configurationRest.getFileStructure());
 			if (FileManagementConstant.DELIMITER.equals(configurationRest.getFileStructure())) {
@@ -83,37 +75,35 @@ public class FileConfigurationServiceImpl extends AbstractConfigurationService i
 			fileConfigurationEntity.setPaymentIdentifier(configurationFields.getPaymentIdentifier());
 			fileConfigurationEntity.setDueDate(configurationFields.getDueDate());
 			fileConfigurationEntity.setProcessingDate(configurationFields.getProcessingDate());
-			fileConfigurationEntity.setUpdated(new Date());
-			fileConfigEntityMap =  populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
-					fileConfigurationEntity);
-			fileConfigurationEntity = objectMapper.convertValue(fileConfigEntityMap, FileConfigurationEntity.class);
+			populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(), fileConfigurationEntity);
+			
 		}
 		fileConfigurationEntity.setUpdated(new Date());
 		fileConfigurationEntity.setUpdatedBy(configurationRest.getImCode());
 
 		fileConfigurationRepo.save(fileConfigurationEntity);
 
-		FileConfigurationEntity savedFileConfigurationEntity = fileConfigurationRepo
-				.getFileConfiguration(configurationRest.getImCode()).get(0);
-		FileConfigurationRest savedConfigurationRest = mapToFileConfigurationRest(savedFileConfigurationEntity);
+		List<FileConfigurationEntity> savedFileConfigurationEntityList = fileConfigurationRepo
+				.findByImCode(configurationRest.getImCode());
+		FileConfigurationRest savedConfigurationRest = mapToFileConfigurationRest(
+				savedFileConfigurationEntityList.get(0));
 
-		LOGGER.info("Exiting saveFileConfiguration of " + FileConfigurationServiceImpl.class.getName());
+		log.info("Exiting saveFileConfiguration of " + this.getClass().getSimpleName());
 		return savedConfigurationRest;
 	}
 
 	@Override
 	public FileConfigurationRest viewFileConfiguration(String imCode) throws NotFoundException {
 
-		LOGGER.info("Entering viewFileConfiguration of " + FileConfigurationServiceImpl.class.getName());
-		// have to validate user for the userId and userType
+		log.info("Entering viewFileConfiguration of " + this.getClass().getSimpleName());
 
 		FileConfigurationRest configurationRest = null;
-		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(imCode);
+		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.findByImCode(imCode);
 		if (CollectionUtils.isNotEmpty(fileConfigurationEntityList)) {
 			configurationRest = mapToFileConfigurationRest(fileConfigurationEntityList.get(0));
 		}
 
-		LOGGER.info("Exiting viewFileConfiguration of " + FileConfigurationServiceImpl.class.getName());
+		log.info("Exiting viewFileConfiguration of " + this.getClass().getSimpleName());
 		return configurationRest;
 	}
 

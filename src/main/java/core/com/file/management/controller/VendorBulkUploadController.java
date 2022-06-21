@@ -1,6 +1,3 @@
-/**
- * created by supro
- */
 package core.com.file.management.controller;
 
 import java.io.IOException;
@@ -13,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +24,10 @@ import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.BulkUploadFileResponse;
 import core.com.file.management.service.VendorBulkUploadFileService;
 import core.com.file.management.util.FileConfigurationUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
+@CrossOrigin
 @RestController
 @RequestMapping(value = "bulkUpload")
 public class VendorBulkUploadController {
@@ -40,6 +41,8 @@ public class VendorBulkUploadController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<BulkUploadFileResponse> bulkUpload(@RequestParam("file") MultipartFile file,
 			@RequestParam(name = "imCode", required = true) String imCode) {
+		
+		log.info("Entering bulkUpload of {}", this.getClass().getSimpleName());
 		
 		BulkUploadFileResponse bulkUploadFileResponse = new BulkUploadFileResponse();
 		String response = null;
@@ -58,6 +61,8 @@ public class VendorBulkUploadController {
 			status = HttpStatus.BAD_REQUEST;
 		}
 		
+		log.info("Exiting bulkUpload of {}", this.getClass().getSimpleName());
+		
 		return new ResponseEntity<BulkUploadFileResponse>(bulkUploadFileResponse, status);
 	}
 	
@@ -68,9 +73,13 @@ public class VendorBulkUploadController {
 			@RequestParam(name = "sortBy", required = false) String sortBy,
 			@RequestParam(name = "size", required = false) Integer size,
 			@RequestParam(name = "page", required = false) Integer page) {
+		
+		log.info("Entering getFileUploadDetails of {}", this.getClass().getSimpleName());
 
 		Pageable pageable = fileManagementUtil.getPageable(dir, sortBy, size, page);
 		BulkUploadFileResponse respone = vendorBulkUploadService.getUploadFileDetails(pageable, status, imCode);
+		
+		log.info("Exiting getFileUploadDetails of {}", this.getClass().getSimpleName());
 
 		return new ResponseEntity<BulkUploadFileResponse>(respone, HttpStatus.OK);
 	}
@@ -80,6 +89,8 @@ public class VendorBulkUploadController {
 			@RequestParam(name = "userId", required = true) String userId,
 			@RequestParam(name = "userType", required = true) String userType) {
 		
+		log.info("Entering getFileById of {}", this.getClass().getSimpleName());
+		
 		InputStreamResource resource;
 		MultipartFile multipartFile = null;
 		try {
@@ -88,6 +99,9 @@ public class VendorBulkUploadController {
 		} catch (VendorBulkUploadException | IOException e) {
 			return ResponseEntity.internalServerError().body(null);
 		}
+		
+		log.info("Exiting getFileById of {}", this.getClass().getSimpleName());
+		
 		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, multipartFile.getName())
 				.contentType(MediaType.parseMediaType(multipartFile.getContentType())).body(resource);
 	}
@@ -99,12 +113,17 @@ public class VendorBulkUploadController {
 			@RequestParam(name = "userId", required = true) String userId,
 			@RequestParam(name = "userType", required = true) String userType) throws FileConfigurationException {
 
+		log.info("Entering downLoadSampleFile of {}", this.getClass().getSimpleName());
+		
 		InputStreamResource resource;
 		try {
 			resource = new InputStreamResource(vendorBulkUploadService.download(userId, userType, mediaType));
 		} catch (VendorBulkUploadException e) {
 			return ResponseEntity.internalServerError().body(null);
 		}
+		
+		log.info("Exiting downLoadSampleFile of {}", this.getClass().getSimpleName());
+		
 		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, fileName)
 				.contentType(MediaType.parseMediaType(mediaType)).body(resource);
 	}

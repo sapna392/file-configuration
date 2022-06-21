@@ -36,7 +36,7 @@ import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.BulkUploadFileResponse;
 import core.com.file.management.model.BulkUploadFileRest;
 import core.com.file.management.model.ResponseMetadata;
-import core.com.file.management.model.VendorTxnInvoiceRest;
+import core.com.file.management.model.VendorBulkUploadRest;
 import core.com.file.management.repo.BulkUploadFileRepo;
 import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.service.VendorBulkUploadFileService;
@@ -71,24 +71,13 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	public String upload(MultipartFile file, String imCode) throws VendorBulkUploadException {
 
 		try {
-			if (!(FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
-					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())
-					|| FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType()))) {
-				throw new VendorBulkUploadException(ErrorCode.INVALID_FILE_TYPE);
-			}
-			if (file.isEmpty()) {
-				throw new VendorBulkUploadException(ErrorCode.EMPTY_FILE_CONTENT);
-			}
-			List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(imCode);
+			List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo
+					.getFileConfiguration(imCode);
 			if (CollectionUtils.isEmpty(fileConfigurationEntityList)) {
 				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 			}
 			FileConfigurationEntity fileConfigurationEntity = fileConfigurationEntityList.get(0);
-			if ((FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
-					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType()))
-							&& FileManagementConstant.FIXED.equals(fileConfigurationEntity.getFileStructure())) {
-				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
-			}
+			vendorTxnInvoiceValidator.validateUploadedFile(file, fileConfigurationEntity.getFileStructure());
 
 			List<String> contentList = null;
 			int count = 0;
@@ -102,7 +91,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			}
 
 			contentList = contentList.stream().filter(cl -> StringUtils.isNotEmpty(cl)).collect(Collectors.toList());
-			VendorTxnInvoiceRest vendorTxnInvcRest = null;
+			VendorBulkUploadRest vendorBulkUploadRest = null;
 			Map<String, String> configMap = objectMapper.convertValue(fileConfigurationEntity, Map.class);
 			configMap.remove(FileManagementConstant.FILE_CONFIG_DELIMITER);
 			configMap.remove(FileManagementConstant.FILE_CONFIG_STRUCTURE);
@@ -117,13 +106,13 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 							contentMap = mapBulkUploadFields(content, fileConfigurationEntity.getFileDelimiter(),
 									configMap);
 						}
-						vendorTxnInvcRest = objectMapper.convertValue(contentMap, VendorTxnInvoiceRest.class);
-						vendorTxnInvoiceValidator.validateUploadedFile(vendorTxnInvcRest);
+						vendorBulkUploadRest = objectMapper.convertValue(contentMap, VendorBulkUploadRest.class);
+						vendorTxnInvoiceValidator.validateInvoiceDetails(vendorBulkUploadRest);
 						count++;
-						amount += vendorTxnInvcRest.getInvoiceAmount();
+						amount += vendorBulkUploadRest.getInvoiceAmount();
 					} else if (FileManagementConstant.FIXED.equals(fileConfigurationEntity.getFileStructure())) {
 						for (Map.Entry<String, String> entry : configMap.entrySet()) {
-							if (FileManagementConstant.ADDITIONAL_FIELD.contains(entry.getKey())
+							if (FileManagementConstant.ADDITIONAL_DB_FIELDS.contains(entry.getKey())
 									&& entry.getValue() != null) {
 								String[] pos = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER)[1]
 										.split(FileManagementConstant.COMMA);
@@ -133,27 +122,34 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 							String[] pos = entry.getValue().split(FileManagementConstant.COMMA);
 							contentMap.put(entry.getKey(),
 									content.substring(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]) + 1));
-							vendorTxnInvcRest = objectMapper.convertValue(contentMap, VendorTxnInvoiceRest.class);
-							vendorTxnInvoiceValidator.validateUploadedFile(vendorTxnInvcRest);
+							vendorBulkUploadRest = objectMapper.convertValue(contentMap, VendorBulkUploadRest.class);
+							vendorTxnInvoiceValidator.validateInvoiceDetails(vendorBulkUploadRest);
 							count++;
-							amount += vendorTxnInvcRest.getInvoiceAmount();
+							amount += vendorBulkUploadRest.getInvoiceAmount();
 						}
 					}
 				}
 			} else if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
 					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())) {
+				List <String> configHeader = configMap.keySet().stream().collect(Collectors.toList());
+				String headers = String.join(FileManagementConstant.COMMA, configHeader);
+				
+				if(headers != contentList.get(0)) {
+					throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
+				}
 				for (String content : contentList) {
 					Map<String, String> contentMap = mapBulkUploadFields(content, FileManagementConstant.COMMA,
 							configMap);
-					vendorTxnInvcRest = objectMapper.convertValue(contentMap, VendorTxnInvoiceRest.class);
-					vendorTxnInvoiceValidator.validateUploadedFile(vendorTxnInvcRest);
+					vendorBulkUploadRest = objectMapper.convertValue(contentMap, VendorBulkUploadRest.class);
+					vendorTxnInvoiceValidator.validateInvoiceDetails(vendorBulkUploadRest);
 					count++;
-					amount += vendorTxnInvcRest.getInvoiceAmount();
+					amount += vendorBulkUploadRest.getInvoiceAmount();
 				}
 			}
 
 			String contentHash = fileManagementUtil.getContentHash(file.getOriginalFilename());
 			String filePath = fileManagementUtil.getFilePath(contentHash);
+			// Saving file to local starts
 			File savedFile = new File(filePath);
 			if(!savedFile.exists())
 				savedFile.mkdirs();
@@ -162,6 +158,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			try (OutputStream outStream = new FileOutputStream(savedFile)) {
 			    outStream.write(file.getInputStream().readAllBytes());
 			}
+			// Saving file to local ends
 			/*
 			 * if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())) {
 			 * workbook = createExcelWorkbook(decodedString);

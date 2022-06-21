@@ -1,8 +1,6 @@
 package core.com.file.management.validator;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
@@ -29,7 +27,7 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 	public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 		try {
 			String dateString = p.readValueAs(String.class);
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/uuuu")
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
 					.withResolverStyle(ResolverStyle.STRICT);
 			LocalDate localDate = LocalDate.parse(dateString, formatter);
 			return java.sql.Date.valueOf(localDate);

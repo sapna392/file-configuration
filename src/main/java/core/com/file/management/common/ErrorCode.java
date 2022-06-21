@@ -9,6 +9,7 @@ public class ErrorCode {
 	public static final String INVALID_ORDER = "Invalid field order";
 	public static final String INVALID_POSITION = "Invalid field postions";
 	public static final String INVALID_FILE_STRUCT = "Invalid file structure. Should be either delimiterField or fixed";
+	public static final String FILE_CONFIGURATION_ERROR = "Error while saving file configuration. Please contact admin";
 	public static final String EMPTY_FILE_NAME = "File cannot be uploaded with empty name";
 	public static final String EMPTY_FILE_CONTENT = "File is empty";
 	public static final String INVALID_FILE_TYPE = "Invalid File Format. The file has to be in .txt or . xls or .csv format";

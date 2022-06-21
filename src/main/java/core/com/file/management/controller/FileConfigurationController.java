@@ -1,7 +1,5 @@
 package core.com.file.management.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,15 +24,15 @@ import core.com.file.management.service.FileConfigurationService;
 import core.com.file.management.validator.FileConfigurationValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 
-@RestController
+@Slf4j
 @CrossOrigin
+@RestController
 @RequestMapping(value = "/fileConfiguration")
 @Api(value = "File Configuration Controller")
 public class FileConfigurationController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(FileConfigurationController.class);
-	
 	@Autowired
 	private FileConfigurationValidator validator;
 	
@@ -51,8 +49,8 @@ public class FileConfigurationController {
 	public ResponseEntity<FileConfigurationResponse> submitConfiguration(
 			@Validated @RequestBody FileConfigurationRest fileConfigurationRest) {
 
-		LOGGER.info("Entering submitConfiguration of " + FileConfigurationController.class.getName());
-		LOGGER.info(fileConfigurationRest.toString());
+		log.info("Entering submitConfiguration of " + FileConfigurationController.class.getName());
+		log.info(fileConfigurationRest.toString());
 
 		FileConfigurationResponse configurationResponse = new FileConfigurationResponse();
 		FileConfigurationRest configurationRest= null;
@@ -79,8 +77,8 @@ public class FileConfigurationController {
 			configurationResponse.setStatus_msg(e.getMessage());
 		}
 
-		LOGGER.info(configurationResponse.toString());
-		LOGGER.info("Exiting submitConfiguration of " + FileConfigurationController.class.getName());
+		log.info(configurationResponse.toString());
+		log.info("Exiting submitConfiguration of " + FileConfigurationController.class.getName());
 		
 		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, status);
 	}
@@ -90,7 +88,7 @@ public class FileConfigurationController {
 	public ResponseEntity<FileConfigurationResponse> viewConfiguration(
 			@RequestParam(name = "imCode", required = true) String imCode) {
 
-		LOGGER.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
+		log.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
 
 		FileConfigurationResponse configurationResponse = new FileConfigurationResponse();
 		FileConfigurationRest fileConfigurationRest = null;
@@ -110,7 +108,7 @@ public class FileConfigurationController {
 			status = HttpStatus.NOT_FOUND;
 		}
 
-		LOGGER.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
+		log.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
 		
 		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, status);
 	}

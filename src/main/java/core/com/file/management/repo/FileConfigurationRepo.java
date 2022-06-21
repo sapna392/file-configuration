@@ -12,10 +12,10 @@ import core.com.file.management.entity.FileConfigurationEntity;
 @Repository
 public interface FileConfigurationRepo extends JpaRepository<FileConfigurationEntity, Long> {
 
-	@Query("SELECT COUNT(1) FROM FileConfigurationEntity fce WHERE fce.imCode = ?1")
+	@Query("SELECT COUNT(1) FROM FileConfigurationEntity fce WHERE fce.imCode = :imCode")
 	long checkIfConfigurationExists(@Param("imCode") String imCode);
 	
-	@Query("SELECT NEW core.com.file.management.entity.FileConfigurationEntity ( fce.fileStructure, fce.fileDelimiter, "
+	@Query("SELECT NEW core.com.file.management.entity.FileConfigurationEntity (fce.fileStructure, fce.fileDelimiter, "
 			+ "fce.invoiceNumber, fce.invoiceAmount, fce.invoiceDate, fce.vendorCode, fce.vendorName, fce.dueDate, "
 			+ "fce.paymentIdentifier, fce.processingDate, fce.additionalField1, fce.additionalField2, "
 			+ "fce.additionalField3, fce.additionalField4, fce.additionalField5, fce.additionalField6, "
@@ -24,5 +24,16 @@ public interface FileConfigurationRepo extends JpaRepository<FileConfigurationEn
 			+ "WHERE fce.imCode = :imCode "
 			+ "ORDER BY fce.updated DESC")
 	List<FileConfigurationEntity> getFileConfiguration(@Param("imCode") String imCode);
+	
+	@Query("SELECT NEW core.com.file.management.entity.FileConfigurationEntity (fce.fileStructure, fce.fileDelimiter, "
+			+ "fce.invoiceNumber, fce.invoiceAmount, fce.invoiceDate, fce.vendorCode, fce.vendorName, fce.dueDate, "
+			+ "fce.paymentIdentifier, fce.processingDate, fce.created, fce.createdBy) "
+			+ "FROM FileConfigurationEntity fce "
+			+ "WHERE fce.imCode = :imCode "
+			+ "ORDER BY fce.updated DESC")
+			List<FileConfigurationEntity> getFileConfigurationWithoutAdditionalFields(@Param("imCode") String imCode);
+		
+	@Query("SELECT fce FROM FileConfigurationEntity fce WHERE fce.imCode = :imCode ORDER BY fce.updated DESC")
+	List<FileConfigurationEntity> findByImCode(@Param("imCode") String imCode);
 	
 }

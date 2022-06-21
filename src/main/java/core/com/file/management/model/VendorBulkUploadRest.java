@@ -9,7 +9,7 @@ import core.com.file.management.validator.DateDeSerializer;
 import lombok.Data;
 
 @Data
-public class VendorTxnInvoiceRest {
+public class VendorBulkUploadRest {
 
 	@JsonAlias("InvoiceNumber")
 	private String invoiceNumber;

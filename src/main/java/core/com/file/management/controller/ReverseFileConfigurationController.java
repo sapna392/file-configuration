@@ -86,7 +86,7 @@ public class ReverseFileConfigurationController {
 	@ApiOperation(value = "View file configuration", notes = "This method shows the file configuration")
 	@RequestMapping(value = "view", method = RequestMethod.GET)
 	public ResponseEntity<ReverseFileConfigurationResponse> viewConfiguration(
-			@RequestParam(name = "userId", required = true) String userId) {
+			@RequestParam(name = "imCode", required = true) String imCode) {
 
 		LOGGER.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
 
@@ -94,7 +94,7 @@ public class ReverseFileConfigurationController {
 		ReverseFileConfigurationRest configurationRest = null;
 		HttpStatus status = null;
 		try {
-			configurationRest = reverseFileConfigurationService.viewFileConfiguration(userId);
+			configurationRest = reverseFileConfigurationService.viewFileConfiguration(imCode);
 			configurationResponse.setStatus(FileManagementConstant.SUCCESS);
 			configurationResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
 			if(configurationRest != null) {

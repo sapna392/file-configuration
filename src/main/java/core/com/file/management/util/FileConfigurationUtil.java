@@ -44,8 +44,8 @@ public class FileConfigurationUtil {
 	public List<String> readFromExcelWorkbook(InputStream inputStream) throws VendorBulkUploadException {
 		List<String> contentList = new ArrayList<>();
 		try (HSSFWorkbook workbook = new HSSFWorkbook(inputStream)) {
+			
 			HSSFSheet sheet = workbook.getSheetAt(0);
-
 			Iterator<?> rowIterator = sheet.rowIterator();
 			while (rowIterator.hasNext()) {
 				HSSFRow row = (HSSFRow) rowIterator.next();
