@@ -36,7 +36,7 @@ import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.repo.BulkUploadFileRepo;
 
 @Component
-public class FileManagementUtil {
+public class FileConfigurationUtil {
 
 	@Autowired
 	BulkUploadFileRepo uploadFileRepo;

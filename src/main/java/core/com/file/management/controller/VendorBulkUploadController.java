@@ -25,7 +25,7 @@ import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.BulkUploadFileResponse;
 import core.com.file.management.service.VendorBulkUploadFileService;
-import core.com.file.management.util.FileManagementUtil;
+import core.com.file.management.util.FileConfigurationUtil;
 
 @RestController
 @RequestMapping(value = "bulkUpload")
@@ -35,27 +35,30 @@ public class VendorBulkUploadController {
 	VendorBulkUploadFileService vendorBulkUploadService;
 	
 	@Autowired
-	FileManagementUtil fileManagementUtil;
+	FileConfigurationUtil fileManagementUtil;
 	
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<BulkUploadFileResponse> bulkUpload(@RequestParam("file") MultipartFile file,
 			@RequestParam(name = "imCode", required = true) String imCode) {
 		
-		String response = null;
 		BulkUploadFileResponse bulkUploadFileResponse = new BulkUploadFileResponse();
+		String response = null;
+		HttpStatus status = null;
 		try {
 			response = vendorBulkUploadService.upload(file, imCode);
 			bulkUploadFileResponse.setStatus_code(HttpStatus.OK.value());
 			bulkUploadFileResponse.setStatus(FileManagementConstant.SUCCESS);
 			bulkUploadFileResponse.setStatus_msg(response);
+			status = HttpStatus.OK;
 		} catch(VendorBulkUploadException fce) {
 			response = fce.getMessage();
 			bulkUploadFileResponse.setStatus_code(HttpStatus.BAD_REQUEST.value());
 			bulkUploadFileResponse.setStatus(FileManagementConstant.FAILURE);
 			bulkUploadFileResponse.setStatus_msg(response);
+			status = HttpStatus.BAD_REQUEST;
 		}
 		
-		return new ResponseEntity<BulkUploadFileResponse>(bulkUploadFileResponse, HttpStatus.OK);
+		return new ResponseEntity<BulkUploadFileResponse>(bulkUploadFileResponse, status);
 	}
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET)

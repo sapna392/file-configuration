@@ -5,7 +5,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import core.com.file.management.validation.DateDeSerializer;
+import core.com.file.management.validator.DateDeSerializer;
 import lombok.Data;
 
 @Data

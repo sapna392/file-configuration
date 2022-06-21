@@ -12,8 +12,8 @@ import core.com.file.management.entity.FileConfigurationEntity;
 @Repository
 public interface FileConfigurationRepo extends JpaRepository<FileConfigurationEntity, Long> {
 
-	@Query("SELECT COUNT(1) FROM FileConfigurationEntity fce WHERE fce.userId = ?1 and fce.userType = ?2")
-	long checkIfConfigurationExists(@Param("userId") String userId, @Param("userType") String userType);
+	@Query("SELECT COUNT(1) FROM FileConfigurationEntity fce WHERE fce.imCode = ?1")
+	long checkIfConfigurationExists(@Param("imCode") String imCode);
 	
 	@Query("SELECT NEW core.com.file.management.entity.FileConfigurationEntity ( fce.fileStructure, fce.fileDelimiter, "
 			+ "fce.invoiceNumber, fce.invoiceAmount, fce.invoiceDate, fce.vendorCode, fce.vendorName, fce.dueDate, "
@@ -21,8 +21,8 @@ public interface FileConfigurationRepo extends JpaRepository<FileConfigurationEn
 			+ "fce.additionalField3, fce.additionalField4, fce.additionalField5, fce.additionalField6, "
 			+ "fce.additionalField7, fce.additionalField8, fce.additionalField9, fce.additionalField10) "
 			+ "FROM FileConfigurationEntity fce "
-			+ "WHERE fce.userId = :userId and fce.userType = :userType "
+			+ "WHERE fce.imCode = :imCode "
 			+ "ORDER BY fce.updated DESC")
-	List<FileConfigurationEntity> getFileConfiguration(@Param("userId") String userId, @Param("userType") String userType);
+	List<FileConfigurationEntity> getFileConfiguration(@Param("imCode") String imCode);
 	
 }

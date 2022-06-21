@@ -10,18 +10,18 @@ import javax.persistence.TemporalType;
 @MappedSuperclass
 public class AbstractEntity {
 	
-	@Column(name = "CREATED"/* , nullable = false */)
+	@Column(name = "CREATED" , nullable = false )
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date created;
 	
-	@Column(name = "CREATED_BY"/* , nullable = false */)
+	@Column(name = "CREATED_BY" , nullable = false )
 	private String createdBy;
 	
-	@Column(name = "UPDATED"/* , nullable = false */)
+	@Column(name = "UPDATED" , nullable = false )
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date updated;
 	
-	@Column(name = "UPDATED_BY"/* , nullable = false */)
+	@Column(name = "UPDATED_BY" , nullable = false )
 	private String updatedBy;
 
 	public Date getCreated() {

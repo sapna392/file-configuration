@@ -17,8 +17,8 @@ import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.model.BulkUploadFileResponse;
 import core.com.file.management.model.BulkUploadFileRest;
 import core.com.file.management.service.VendorBulkUploadFileService;
-import core.com.file.management.util.FileManagementUtil;
-import core.com.file.management.validation.VendorTxnInvoiceValidator;
+import core.com.file.management.util.FileConfigurationUtil;
+import core.com.file.management.validator.VendorTxnInvoiceValidator;
 
 @RestController
 @RequestMapping(value = "/fileManagement")
@@ -31,7 +31,7 @@ public class FileManagementController {
 	VendorBulkUploadFileService bulkUploadService;
 	
 	@Autowired
-	FileManagementUtil fileManagementUtil;
+	FileConfigurationUtil fileManagementUtil;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {

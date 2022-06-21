@@ -2,13 +2,13 @@ package core.com.file.management.common;
 
 public class ErrorCode {
 	
-	public static final String EMPTY_USER_ID = "User id is empty";
-	public static final String EMPTY_USER_TYPE = "User type is empty";
+	public static final String EMPTY_IM_CODE = "IM code is empty";
 	public static final String DELIMITER_REQ = "Delimiter is required if the file structure is delimiter";
+	public static final String FILE_CONF_REQ = "File cofiguration is required";
 	public static final String DUPLICATE_FILEDS = "Invalid configuration since there are duplicate fields";
 	public static final String INVALID_ORDER = "Invalid field order";
 	public static final String INVALID_POSITION = "Invalid field postions";
-	public static final String INVALID_FILE_STRUCT = "Invalid file structure. Should be either delimiter or fixed";
+	public static final String INVALID_FILE_STRUCT = "Invalid file structure. Should be either delimiterField or fixed";
 	public static final String EMPTY_FILE_NAME = "File cannot be uploaded with empty name";
 	public static final String EMPTY_FILE_CONTENT = "File is empty";
 	public static final String INVALID_FILE_TYPE = "Invalid File Format. The file has to be in .txt or . xls or .csv format";

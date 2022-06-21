@@ -1,4 +1,4 @@
-package core.com.file.management.validation;
+package core.com.file.management.validator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

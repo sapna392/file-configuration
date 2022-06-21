@@ -29,6 +29,7 @@ public class FileManagementConstant {
 	public static final String FILE_UPLOADED_SUCCESS = "File uploaded successfully";
 	public static final String FILE_CONFIG_SAVE_SUCCESS = "File configuration saved successfully";
 	public static final String FILE_CONFIG_FETCH_SUCCESS = "File configuration fetched successfully";
+	public static final String FILE_CONFIG_DOESNOT_EXISTS = "File configuration does not exists for the current user";
 	public static final String DEAFULT_SORT_FIELD = "id";
 	public static final Integer DEFAULT_PAGE_SIZE = 20;
 	public static final Integer DEAFULT_PAGE_NUM = 1;

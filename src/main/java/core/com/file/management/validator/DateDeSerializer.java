@@ -1,4 +1,4 @@
-package core.com.file.management.validation;
+package core.com.file.management.validator;
 
 import java.io.IOException;
 import java.text.ParseException;

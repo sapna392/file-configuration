@@ -40,8 +40,8 @@ import core.com.file.management.model.VendorTxnInvoiceRest;
 import core.com.file.management.repo.BulkUploadFileRepo;
 import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.service.VendorBulkUploadFileService;
-import core.com.file.management.util.FileManagementUtil;
-import core.com.file.management.validation.VendorTxnInvoiceValidator;
+import core.com.file.management.util.FileConfigurationUtil;
+import core.com.file.management.validator.VendorTxnInvoiceValidator;
 
 @Service
 public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileService {
@@ -50,7 +50,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	private Integer MAX_FILE_SIZE;
 
 	@Autowired
-	private FileManagementUtil fileManagementUtil;
+	private FileConfigurationUtil fileManagementUtil;
 
 	@Autowired
 	private VendorTxnInvoiceValidator vendorTxnInvoiceValidator;
@@ -79,7 +79,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			if (file.isEmpty()) {
 				throw new VendorBulkUploadException(ErrorCode.EMPTY_FILE_CONTENT);
 			}
-			List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(imCode, "IM");
+			List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(imCode);
 			if (CollectionUtils.isEmpty(fileConfigurationEntityList)) {
 				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 			}
@@ -179,7 +179,9 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			String bulkFileGuid = fileManagementUtil.getGuid(FileManagementConstant.BULK_UPLOAD);
 			bulkUploadFileEntity.setGuid(bulkFileGuid);
 			bulkUploadFileEntity.setCreated(new Date());
+			bulkUploadFileEntity.setCreatedBy(imCode);
 			bulkUploadFileEntity.setUpdated(new Date());
+			bulkUploadFileEntity.setUpdatedBy(imCode);
 			bulkUploadFileRepo.save(bulkUploadFileEntity);
 
 		} catch (IOException | NoSuchAlgorithmException | VendorBulkUploadException exp) {
@@ -262,8 +264,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	@Override
 	public InputStream download(String userId, String userType, String mediaType) throws VendorBulkUploadException {
 
-		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(userId,
-				userType);
+		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(userId);
 		if (CollectionUtils.isNotEmpty(fileConfigurationEntityList)) {
 			Map<String, String> confifMap = objectMapper.convertValue(fileConfigurationEntityList.get(0), Map.class);
 			Map<String, Integer> filteredConfigMap = new HashMap<>();

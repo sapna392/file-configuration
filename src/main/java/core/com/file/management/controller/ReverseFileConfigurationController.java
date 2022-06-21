@@ -8,11 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,46 +19,46 @@ import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.exception.NotFoundException;
-import core.com.file.management.model.FileConfigurationResponse;
-import core.com.file.management.model.FileConfigurationRest;
-import core.com.file.management.service.FileConfigurationService;
-import core.com.file.management.validator.FileConfigurationValidator;
+import core.com.file.management.model.ReverseFileConfigurationResponse;
+import core.com.file.management.model.ReverseFileConfigurationRest;
+import core.com.file.management.service.ReverseFileConfigurationService;
+import core.com.file.management.validator.ReverseFileConfigurationValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/fileConfiguration")
-@Api(value = "File Configuration Controller")
-public class FileConfigurationController {
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(FileConfigurationController.class);
+@RequestMapping(value = "/reverseFileConfiguration")
+@Api(value = "Reverse File Configuration Controller")
+public class ReverseFileConfigurationController {
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(ReverseFileConfigurationController.class);
 	
 	@Autowired
-	private FileConfigurationValidator validator;
+	private ReverseFileConfigurationValidator validator;
 	
 	@Autowired
-	private FileConfigurationService fileConfigurationService;
-
+	private ReverseFileConfigurationService reverseFileConfigurationService;
+	
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
 		binder.addValidators(validator);
 	}
-
-	@ApiOperation(value = "Submit file configuration", notes = "This method submits the file configuration")
-	@PostMapping(value = "/submit")
-	public ResponseEntity<FileConfigurationResponse> submitConfiguration(
-			@Validated @RequestBody FileConfigurationRest fileConfigurationRest) {
-
-		LOGGER.info("Entering submitConfiguration of " + FileConfigurationController.class.getName());
-		LOGGER.info(fileConfigurationRest.toString());
-
-		FileConfigurationResponse configurationResponse = new FileConfigurationResponse();
-		FileConfigurationRest configurationRest= null;
+	
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public ResponseEntity<ReverseFileConfigurationResponse> submitConfiguration(
+			@Validated @RequestBody ReverseFileConfigurationRest reverseFileConfigurationRest) {
+		
+		LOGGER.info("Entering submitConfiguration of " +ReverseFileConfigurationController.class.getName());
+		LOGGER.info(reverseFileConfigurationRest.toString());
+		
+		ReverseFileConfigurationResponse configurationResponse = new ReverseFileConfigurationResponse();
+		ReverseFileConfigurationRest configurationRest = null;
 		HttpStatus status = null;
+		
 		try {
-			validator.validateFileConfiguration(fileConfigurationRest);
-			configurationRest = fileConfigurationService.saveFileConfiguration(fileConfigurationRest);
+			validator.validateFileConfiguration(reverseFileConfigurationRest);
+			configurationRest = reverseFileConfigurationService.saveFileConfiguration(reverseFileConfigurationRest);
 			configurationResponse.setData(configurationRest);
 			configurationResponse.setStatus(FileManagementConstant.SUCCESS);
 			configurationResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
@@ -80,39 +79,42 @@ public class FileConfigurationController {
 		}
 
 		LOGGER.info(configurationResponse.toString());
-		LOGGER.info("Exiting submitConfiguration of " + FileConfigurationController.class.getName());
-		
-		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, status);
+		LOGGER.info("Exiting submitConfiguration of " + ReverseFileConfigurationController.class.getName());
+		return new ResponseEntity<ReverseFileConfigurationResponse>(configurationResponse, status);
 	}
-
+	
 	@ApiOperation(value = "View file configuration", notes = "This method shows the file configuration")
-	@GetMapping(value = "view")
-	public ResponseEntity<FileConfigurationResponse> viewConfiguration(
-			@RequestParam(name = "imCode", required = true) String imCode) {
+	@RequestMapping(value = "view", method = RequestMethod.GET)
+	public ResponseEntity<ReverseFileConfigurationResponse> viewConfiguration(
+			@RequestParam(name = "userId", required = true) String userId) {
 
 		LOGGER.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
 
-		FileConfigurationResponse configurationResponse = new FileConfigurationResponse();
-		FileConfigurationRest fileConfigurationRest = null;
+		ReverseFileConfigurationResponse configurationResponse = new ReverseFileConfigurationResponse();
+		ReverseFileConfigurationRest configurationRest = null;
 		HttpStatus status = null;
 		try {
-			fileConfigurationRest = fileConfigurationService.viewFileConfiguration(imCode);
+			configurationRest = reverseFileConfigurationService.viewFileConfiguration(userId);
 			configurationResponse.setStatus(FileManagementConstant.SUCCESS);
 			configurationResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
-			configurationResponse.setStatus_msg(FileManagementConstant.FILE_CONFIG_FETCH_SUCCESS);
-			configurationResponse.setData(fileConfigurationRest);
+			if(configurationRest != null) {
+				configurationResponse.setStatus_msg(FileManagementConstant.FILE_CONFIG_FETCH_SUCCESS);
+			} else {
+				configurationResponse.setStatus_msg(FileManagementConstant.FILE_CONFIG_DOESNOT_EXISTS);
+			}
+			
+			configurationResponse.setData(configurationRest);
 			status = HttpStatus.OK;
-		} catch (NotFoundException e) {
+		} catch (NotFoundException nfe) {
 			configurationResponse.setStatus(FileManagementConstant.FAILURE);
 			configurationResponse.setStatus_code(String.valueOf(HttpStatus.NOT_FOUND.value()));
-			configurationResponse.setStatus_msg(e.getMessage());
-			configurationResponse.setData(fileConfigurationRest);
+			configurationResponse.setStatus_msg(nfe.getMessage());
+			configurationResponse.setData(configurationRest);
 			status = HttpStatus.NOT_FOUND;
 		}
 
 		LOGGER.info("Entering viewConfiguration of " + FileConfigurationController.class.getName());
-		
-		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, status);
+		return new ResponseEntity<ReverseFileConfigurationResponse>(configurationResponse, status);
 	}
-	
+
 }

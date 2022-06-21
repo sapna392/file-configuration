@@ -1,6 +1,3 @@
-/**
- * created by supro
- */
 package core.com.file.management.model;
 
 import java.io.Serializable;
@@ -8,10 +5,6 @@ import java.io.Serializable;
 import io.swagger.annotations.ApiParam;
 import lombok.Data;
 
-/**
- * @author supro
- *
- */
 @Data
 public class AdditionalConfigField implements Serializable {
 

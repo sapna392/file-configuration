@@ -13,11 +13,8 @@ public class FileConfigurationRest implements Serializable{
 
 	private static final long serialVersionUID = -5081204324974166611L;
 	
-	@ApiParam(value = "User ID")
-	private String userId;
-	
-	@ApiParam(value = "User type")
-	private String userType;
+	@ApiParam(value = "IM Code")
+	private String imCode;
 	
 	@ApiParam(value = "File structure")
 	private String fileStructure;
