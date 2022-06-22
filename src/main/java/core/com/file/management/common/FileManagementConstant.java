@@ -41,7 +41,6 @@ public class FileManagementConstant {
 	public static final String CSV_MIME_TYPE = "text/csv";
 	public static final String XLS_MIME_TYPE = "application/vnd.ms-excel";
 	public static final String TXT_MIME_TYPE = "text/plain";
-	public static final String EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	public static final String STATUS_PENDING = "Pending";
 	
 }

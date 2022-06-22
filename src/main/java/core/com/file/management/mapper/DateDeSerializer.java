@@ -1,8 +1,9 @@
-package core.com.file.management.validator;
+package core.com.file.management.mapper;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Date;
 
@@ -31,7 +32,7 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 					.withResolverStyle(ResolverStyle.STRICT);
 			LocalDate localDate = LocalDate.parse(dateString, formatter);
 			return java.sql.Date.valueOf(localDate);
-		} catch (IOException e) {
+		} catch (DateTimeParseException exp) {
 			throw new IOException(String.format(ErrorCode.INVALID_DATE, p.getCurrentName()));
 		}
 	}

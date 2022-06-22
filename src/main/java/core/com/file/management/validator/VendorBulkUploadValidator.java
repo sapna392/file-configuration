@@ -11,11 +11,11 @@ import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.VendorBulkUploadRest;
 
 @Component
-public class VendorTxnInvoiceValidator {
+public class VendorBulkUploadValidator {
 	
 	public void validateUploadedFile(MultipartFile file, String fileStructure) throws VendorBulkUploadException {
 		
-		if (!(FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+		if (!(FileManagementConstant.XLS_MIME_TYPE.equals(file.getContentType())
 				|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())
 				|| FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType()))) {
 			throw new VendorBulkUploadException(ErrorCode.INVALID_FILE_TYPE);
@@ -23,7 +23,7 @@ public class VendorTxnInvoiceValidator {
 		if (file.isEmpty()) {
 			throw new VendorBulkUploadException(ErrorCode.EMPTY_FILE_CONTENT);
 		}
-		if ((FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+		if ((FileManagementConstant.XLS_MIME_TYPE.equals(file.getContentType())
 				|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType()))
 						&& FileManagementConstant.FIXED.equals(fileStructure)) {
 			throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);

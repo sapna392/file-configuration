@@ -10,7 +10,6 @@ public class CustomBeanMapper extends DozerBeanMapper{
 	BeanMappingBuilder beanMappingBuilder = new BeanMappingBuilder() {
 	      @Override
 	      protected void configure() {
-	    	  
 	    	  //insert custom mappings here
 	      }
 	};

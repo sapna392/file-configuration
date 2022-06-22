@@ -8,7 +8,10 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -16,13 +19,14 @@ import java.util.UUID;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -43,16 +47,21 @@ public class FileConfigurationUtil {
 
 	public List<String> readFromExcelWorkbook(InputStream inputStream) throws VendorBulkUploadException {
 		List<String> contentList = new ArrayList<>();
-		try (HSSFWorkbook workbook = new HSSFWorkbook(inputStream)) {
-			
-			HSSFSheet sheet = workbook.getSheetAt(0);
+		try (XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+			XSSFSheet sheet = workbook.getSheetAt(0);
 			Iterator<?> rowIterator = sheet.rowIterator();
 			while (rowIterator.hasNext()) {
-				HSSFRow row = (HSSFRow) rowIterator.next();
+				Row row = (XSSFRow) rowIterator.next();
 				StringBuffer sbInside = new StringBuffer();
 				for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++) {
-					HSSFCell cell = row.getCell(cellIndex, HSSFRow.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-					sbInside.append(cell.getStringCellValue());
+					Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+					if (cell.getCellType() == CellType.STRING) {
+						sbInside.append(cell.getStringCellValue());
+                    } else if(DateUtil.isCellDateFormatted(cell)){
+						sbInside.append(new SimpleDateFormat("dd/MM/yyyy").format(cell.getDateCellValue()));
+                    }else if (cell.getCellType() == CellType.NUMERIC) {
+                    	sbInside.append(cell.getNumericCellValue());
+                    }
 					sbInside.append(FileManagementConstant.COMMA);
 				}
 				contentList.add(sbInside.toString());
@@ -153,7 +162,7 @@ public class FileConfigurationUtil {
 	}
 
 	public ByteArrayInputStream writeToXlsFile(List<String> sortedConfifMapKeys) throws IOException {
-		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream stream = new ByteArrayOutputStream();) {
+		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
 			Sheet sheet = workbook.createSheet();
 			Row row = sheet.createRow(0);
 			int cellCount = 0;

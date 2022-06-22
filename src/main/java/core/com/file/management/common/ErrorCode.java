@@ -24,6 +24,7 @@ public class ErrorCode {
 	public static final String INVOICE_NUMBER_MISSING = "Invoice number missing for one of the record in the uploaded file";
 	public static final String MANDATORY_FIELD_MISSING = "Mandatory field %s missing for invoice number %s";
 	public static final String INVALID_DATE = "Invalid %s, either date or format is invalid";
+	public static final String INVALID_AMOUNT = "Invalid amount value";
 	public static final String PROCESSING_DATE_EARLY = "Processing date is earlier than the invoice date for invoice code %s";
 	public static final String EARLIER_PROCESSING_DATE = "Processing date is earlier for invoice code %s";
 

@@ -41,7 +41,7 @@ import core.com.file.management.repo.BulkUploadFileRepo;
 import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.service.VendorBulkUploadFileService;
 import core.com.file.management.util.FileConfigurationUtil;
-import core.com.file.management.validator.VendorTxnInvoiceValidator;
+import core.com.file.management.validator.VendorBulkUploadValidator;
 
 @Service
 public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileService {
@@ -53,7 +53,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	private FileConfigurationUtil fileManagementUtil;
 
 	@Autowired
-	private VendorTxnInvoiceValidator vendorTxnInvoiceValidator;
+	private VendorBulkUploadValidator vendorBulkUploadValidator;
 
 	@Autowired
 	private BulkUploadFileRepo bulkUploadFileRepo;
@@ -77,12 +77,12 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 				throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
 			}
 			FileConfigurationEntity fileConfigurationEntity = fileConfigurationEntityList.get(0);
-			vendorTxnInvoiceValidator.validateUploadedFile(file, fileConfigurationEntity.getFileStructure());
+			vendorBulkUploadValidator.validateUploadedFile(file, fileConfigurationEntity.getFileStructure());
 
 			List<String> contentList = null;
 			int count = 0;
 			double amount = 0.00;
-			if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())) {
+			if (FileManagementConstant.XLS_MIME_TYPE.equals(file.getContentType())) {
 				contentList = fileManagementUtil.readFromExcelWorkbook(file.getInputStream());
 			} else if (FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType())
 					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())) {
@@ -93,6 +93,8 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			contentList = contentList.stream().filter(cl -> StringUtils.isNotEmpty(cl)).collect(Collectors.toList());
 			VendorBulkUploadRest vendorBulkUploadRest = null;
 			Map<String, String> configMap = objectMapper.convertValue(fileConfigurationEntity, Map.class);
+			configMap = configMap.entrySet().stream().filter(cm -> StringUtils.isNotBlank(cm.getValue()))
+					.collect(Collectors.toMap(cm -> cm.getKey(), cm -> cm.getValue()));
 			configMap.remove(FileManagementConstant.FILE_CONFIG_DELIMITER);
 			configMap.remove(FileManagementConstant.FILE_CONFIG_STRUCTURE);
 			if (FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType())) {
@@ -107,41 +109,48 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 									configMap);
 						}
 						vendorBulkUploadRest = objectMapper.convertValue(contentMap, VendorBulkUploadRest.class);
-						vendorTxnInvoiceValidator.validateInvoiceDetails(vendorBulkUploadRest);
+						vendorBulkUploadValidator.validateInvoiceDetails(vendorBulkUploadRest);
 						count++;
 						amount += vendorBulkUploadRest.getInvoiceAmount();
 					} else if (FileManagementConstant.FIXED.equals(fileConfigurationEntity.getFileStructure())) {
 						for (Map.Entry<String, String> entry : configMap.entrySet()) {
+							String[] pos = null;
 							if (FileManagementConstant.ADDITIONAL_DB_FIELDS.contains(entry.getKey())
 									&& entry.getValue() != null) {
-								String[] pos = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER)[1]
+								pos = entry.getValue().split(FileManagementConstant.PIPE_DELIMITER)[1]
 										.split(FileManagementConstant.COMMA);
-								contentMap.put(entry.getKey(),
-										content.substring(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]) + 1));
+							} else {
+								pos = entry.getValue().split(FileManagementConstant.COMMA);
 							}
-							String[] pos = entry.getValue().split(FileManagementConstant.COMMA);
 							contentMap.put(entry.getKey(),
 									content.substring(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]) + 1));
 							vendorBulkUploadRest = objectMapper.convertValue(contentMap, VendorBulkUploadRest.class);
-							vendorTxnInvoiceValidator.validateInvoiceDetails(vendorBulkUploadRest);
+							vendorBulkUploadValidator.validateInvoiceDetails(vendorBulkUploadRest);
 							count++;
 							amount += vendorBulkUploadRest.getInvoiceAmount();
 						}
 					}
 				}
-			} else if (FileManagementConstant.EXCEL_MIME_TYPE.equals(file.getContentType())
+			} else if (FileManagementConstant.XLS_MIME_TYPE.equals(file.getContentType())
 					|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())) {
-				List <String> configHeader = configMap.keySet().stream().collect(Collectors.toList());
+				List<String> configHeader = configMap.entrySet().stream().map(cm -> {
+					if (FileManagementConstant.ADDITIONAL_DB_FIELDS.contains(cm.getKey())) {
+						return cm.getValue().split(FileManagementConstant.PIPE_DELIMITER)[0];
+					} else {
+						return cm.getKey();
+					}
+				}).collect(Collectors.toList());
+
 				String headers = String.join(FileManagementConstant.COMMA, configHeader);
-				
-				if(headers != contentList.get(0)) {
+				if(headers.equalsIgnoreCase(contentList.get(0))) {
 					throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
 				}
+				contentList.remove(0);
 				for (String content : contentList) {
 					Map<String, String> contentMap = mapBulkUploadFields(content, FileManagementConstant.COMMA,
 							configMap);
 					vendorBulkUploadRest = objectMapper.convertValue(contentMap, VendorBulkUploadRest.class);
-					vendorTxnInvoiceValidator.validateInvoiceDetails(vendorBulkUploadRest);
+					vendorBulkUploadValidator.validateInvoiceDetails(vendorBulkUploadRest);
 					count++;
 					amount += vendorBulkUploadRest.getInvoiceAmount();
 				}
