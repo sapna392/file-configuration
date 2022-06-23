@@ -13,8 +13,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-import core.com.file.management.common.ErrorCode;
-
 @Component
 public class DateDeSerializer extends StdDeserializer<Date> {
 
@@ -25,15 +23,15 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 	}
 
 	@Override
-	public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+	public Date deserialize(JsonParser p, DeserializationContext ctxt) {
 		try {
 			String dateString = p.readValueAs(String.class);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
 					.withResolverStyle(ResolverStyle.STRICT);
 			LocalDate localDate = LocalDate.parse(dateString, formatter);
 			return java.sql.Date.valueOf(localDate);
-		} catch (DateTimeParseException exp) {
-			throw new IOException(String.format(ErrorCode.INVALID_DATE, p.getCurrentName()));
+		} catch (IOException | DateTimeParseException exp) {
+			return null;
 		}
 	}
 }

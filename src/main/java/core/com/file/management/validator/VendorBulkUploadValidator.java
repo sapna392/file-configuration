@@ -39,7 +39,7 @@ public class VendorBulkUploadValidator {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Invoice amount",
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
-		if (vendorBulkUploadRest.getInvoiceNumber() == null) {
+		if (vendorBulkUploadRest.getInvoiceDate() == null) {
 			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Invoice date",
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
@@ -48,16 +48,17 @@ public class VendorBulkUploadValidator {
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
 		if (vendorBulkUploadRest.getProcessingDate() == null) {
-			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Processing date",
+			throw new VendorBulkUploadException(ErrorCode.INVALID_DATE, "Processing date",
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
 		if (vendorBulkUploadRest.getDueDate() == null) {
-			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Due date",
+			throw new VendorBulkUploadException(ErrorCode.INVALID_DATE, "Due date",
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
 
 		if (vendorBulkUploadRest.getProcessingDate().before(vendorBulkUploadRest.getInvoiceDate())) {
-			throw new VendorBulkUploadException(ErrorCode.PROCESSING_DATE_EARLY, vendorBulkUploadRest.getInvoiceNumber());
+			throw new VendorBulkUploadException(ErrorCode.PROCESSING_DATE_EARLY,
+					vendorBulkUploadRest.getInvoiceNumber());
 		}
 		
 		if(vendorBulkUploadRest.getProcessingDate().before(java.sql.Date.valueOf(LocalDate.now()))) {
