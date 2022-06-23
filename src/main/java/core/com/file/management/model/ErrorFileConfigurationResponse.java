@@ -1,12 +1,10 @@
 package core.com.file.management.model;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value = "File configuration response")
-public class FileConfigurationResponse {
+public class ErrorFileConfigurationResponse {
 	
 	@ApiModelProperty(value = "Status")
 	private String status;
@@ -17,7 +15,7 @@ public class FileConfigurationResponse {
 	@ApiModelProperty(value = "Status message")
 	private String status_msg;
 	
-	@ApiModelProperty(value = "File configuration rest model")
-	private FileConfigurationRest data;
+	@ApiModelProperty(value = "Error file configuration rest model")
+	private ErrorFileConfigurationRest data;
 
 }

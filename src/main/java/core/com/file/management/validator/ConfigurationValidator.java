@@ -15,8 +15,8 @@ import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.model.AdditionalConfigField;
+import core.com.file.management.model.ErrorFileConfigurationRest;
 import core.com.file.management.model.FileConfigurationRest;
-import core.com.file.management.model.ReverseFileConfigurationRest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -27,7 +27,7 @@ public abstract class ConfigurationValidator {
 
 	public void validateFileConfiguration(Object configurationRest) throws FileConfigurationException {
 
-		log.info("Entering validateFileConfiguration of " + ConfigurationValidator.class.getName());
+		log.info("Entering validateFileConfiguration of {}", this.getClass().getSimpleName());
 
 		Object configurationField = null;
 		List<AdditionalConfigField> additionalFieldList = null;
@@ -38,11 +38,11 @@ public abstract class ConfigurationValidator {
 			additionalFieldList = ((FileConfigurationRest) configurationRest).getConfigurationFields()
 					.getAdditionalFieldList();
 			fileStructure = ((FileConfigurationRest) configurationRest).getFileStructure();
-		} else if (configurationRest instanceof ReverseFileConfigurationRest) {
-			configurationField = ((ReverseFileConfigurationRest) configurationRest).getConfigurationFields();
-			additionalFieldList = ((ReverseFileConfigurationRest) configurationRest).getConfigurationFields()
+		} else if (configurationRest instanceof ErrorFileConfigurationRest) {
+			configurationField = ((ErrorFileConfigurationRest) configurationRest).getConfigurationFields();
+			additionalFieldList = ((ErrorFileConfigurationRest) configurationRest).getConfigurationFields()
 					.getAdditionalFieldList();
-			fileStructure = ((ReverseFileConfigurationRest) configurationRest).getFileStructure();
+			fileStructure = ((ErrorFileConfigurationRest) configurationRest).getFileStructure();
 		}
 
 		Map<String, Object> configRestMap = mapper.convertValue(configurationField, Map.class);
@@ -89,7 +89,7 @@ public abstract class ConfigurationValidator {
 			throw new FileConfigurationException(ErrorCode.INVALID_FILE_STRUCT);
 		}
 
-		log.info("Exiting validateFileConfiguration of " + ConfigurationValidator.class.getName());
+		log.info("Exiting validateFileConfiguration of {}", this.getClass().getSimpleName());
 	}
 
 }

@@ -7,6 +7,7 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -15,6 +16,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 @Component
 public class DateDeSerializer extends StdDeserializer<Date> {
+	
+	@Value("${core.scfu.local.date.format}")
+	public String LOCAL_DATE_PATTERN;
 
 	private static final long serialVersionUID = 3027403532323368996L;
 
@@ -26,10 +30,9 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 	public Date deserialize(JsonParser p, DeserializationContext ctxt) {
 		try {
 			String dateString = p.readValueAs(String.class);
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LOCAL_DATE_PATTERN)
 					.withResolverStyle(ResolverStyle.STRICT);
-			LocalDate localDate = LocalDate.parse(dateString, formatter);
-			return java.sql.Date.valueOf(localDate);
+			return java.sql.Date.valueOf(LocalDate.parse(dateString, formatter));
 		} catch (IOException | DateTimeParseException exp) {
 			return null;
 		}

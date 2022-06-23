@@ -1,7 +1,7 @@
 package core.com.file.management.common;
 
 public class ErrorCode {
-	
+
 	public static final String EMPTY_IM_CODE = "IM code is empty";
 	public static final String DELIMITER_REQ = "Delimiter is required if the file structure is delimiter";
 	public static final String FILE_CONF_REQ = "File cofiguration is required";
@@ -23,7 +23,7 @@ public class ErrorCode {
 	public static final String FILE_CONFIG_DOESNOT_MATCH = "File configuration does not match with the uploaded file";
 	public static final String INVOICE_NUMBER_MISSING = "Invoice number missing for one of the record in the uploaded file";
 	public static final String MANDATORY_FIELD_MISSING = "Mandatory field %s missing for invoice number %s";
-	public static final String INVALID_DATE = "Invalid %s, either date or format is invalid or field missing for invoice code %s";
+	public static final String INVALID_DATE = "Invalid %s, either date or format is invalid or field is missing for invoice code %s";
 	public static final String INVALID_AMOUNT = "Invalid amount value";
 	public static final String PROCESSING_DATE_EARLY = "Processing date is earlier than the invoice date for invoice code %s";
 	public static final String EARLIER_PROCESSING_DATE = "Processing date is earlier than current date for invoice code %s";

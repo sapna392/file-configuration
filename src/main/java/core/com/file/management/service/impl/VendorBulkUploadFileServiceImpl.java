@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
@@ -42,7 +43,9 @@ import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.service.VendorBulkUploadFileService;
 import core.com.file.management.util.FileConfigurationUtil;
 import core.com.file.management.validator.VendorBulkUploadValidator;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileService {
 
@@ -70,6 +73,8 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	@Override
 	public String upload(MultipartFile file, String imCode) throws VendorBulkUploadException {
 
+		log.info("Entering upload of {}", this.getClass().getSimpleName());
+		
 		try {
 			List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo
 					.getFileConfiguration(imCode);
@@ -199,37 +204,53 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			}
 			throw new VendorBulkUploadException(message);
 		}
+		
+		log.info("Exiting upload of {}", this.getClass().getSimpleName());
 		return FileManagementConstant.FILE_UPLOADED_SUCCESS;
 	}
 
 	@Override
 	public BulkUploadFileResponse getUploadFileDetails(Pageable pageable, String status, String imCode) {
 
+		log.info("Entering getUploadFileDetails of {}", this.getClass().getSimpleName());
+		
+		BulkUploadFileResponse uploadFileResponse = new BulkUploadFileResponse();
+		List<BulkUploadFileRest> uploadFileRestList = null;
 		Page<BulkUploadFileEntity> bulkUploadPage = null;
 		if (status == null) {
-			bulkUploadPage = bulkUploadFileRepo.findAll(pageable);
+			bulkUploadPage = bulkUploadFileRepo.findByImCode(imCode, pageable);
 		} else {
 			bulkUploadPage = bulkUploadFileRepo.findByStatusAndImCode(imCode, status, pageable);
 		}
 
-		List<BulkUploadFileRest> uploadFileRestList = bulkUploadPage.getContent().stream()
-				.map(bup -> mapper.map(bup, BulkUploadFileRest.class)).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(bulkUploadPage.getContent())) {
+			uploadFileRestList = bulkUploadPage.getContent().stream()
+					.map(bup -> mapper.map(bup, BulkUploadFileRest.class)).collect(Collectors.toList());
+			uploadFileResponse.setStatus_msg(FileManagementConstant.FILE_DTLS_FETCH_SUCCESS);
+		} else {
+			uploadFileResponse.setStatus_msg(FileManagementConstant.FILE_CONFIG_DOESNOT_EXISTS);
+		}
 
 		ResponseMetadata metadata = new ResponseMetadata();
 		metadata.setElements(bulkUploadPage.getTotalElements());
 		metadata.setTotalPages(bulkUploadPage.getTotalPages());
 		metadata.setSize(bulkUploadPage.getSize());
 		metadata.setPage(bulkUploadPage.getNumber());
-		BulkUploadFileResponse uploadFileResponse = new BulkUploadFileResponse();
 		uploadFileResponse.setMetadata(metadata);
 		uploadFileResponse.setData(uploadFileRestList);
+		uploadFileResponse.setStatus(FileManagementConstant.SUCCESS);
+		uploadFileResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+		
 
+		log.info("Exiting getUploadFileDetails of {}", this.getClass().getSimpleName());
 		return uploadFileResponse;
 	}
 
 	@Override
 	public MultipartFile getUploadFileById(Long id, String userId, String serType) throws VendorBulkUploadException {
 
+		log.info("Entering getUploadFileById of {}", this.getClass().getSimpleName());
+		
 		BulkUploadFileEntity uploadFileEntity = bulkUploadFileRepo.getFileById(id, userId);
 		String filePath = fileManagementUtil.getFilePath(uploadFileEntity.getHash());
 		MultipartFile multipartFile = null;
@@ -264,12 +285,16 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 					throw new FileConfigurationException(ErrorCode.FILE_PROCESSING_ERROR);
 				}
 			}*/
+		
+		log.info("Exiting getUploadFileById of {}", this.getClass().getSimpleName());
 		return multipartFile;
 	}
 	
 	@Override
 	public InputStream download(String userId, String userType, String mediaType) throws VendorBulkUploadException {
 
+		log.info("Entering download of {}", this.getClass().getSimpleName());
+		
 		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(userId);
 		if (CollectionUtils.isNotEmpty(fileConfigurationEntityList)) {
 			Map<String, String> confifMap = objectMapper.convertValue(fileConfigurationEntityList.get(0), Map.class);
@@ -301,6 +326,7 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 			} catch (IOException e) {
 				throw new VendorBulkUploadException(e.getMessage());
 			}
+			log.info("Exiting download of {}", this.getClass().getSimpleName());
 			return byteArrayInputStream;
 		} else {
 			throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_EXISTS);
@@ -325,6 +351,9 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 	}*/
 
 	private Map<String, String> mapBulkUploadFields(String content, String delimiter, Map<String, String> configMap) {
+		
+		log.info("Entering mapBulkUploadFields of {}", this.getClass().getSimpleName());
+		
 		Map<String, String> contentMap = new HashMap<>();
 		String[] invoiceDetails = content.split(delimiter);
 		for (Map.Entry<String, String> entry : configMap.entrySet()) {
@@ -338,6 +367,8 @@ public class VendorBulkUploadFileServiceImpl implements VendorBulkUploadFileServ
 				}
 			}
 		}
+		
+		log.info("Exiting mapBulkUploadFields of {}", this.getClass().getSimpleName());
 		return contentMap;
 	}
 

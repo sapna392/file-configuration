@@ -9,11 +9,15 @@ import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.VendorBulkUploadRest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class VendorBulkUploadValidator {
 	
 	public void validateUploadedFile(MultipartFile file, String fileStructure) throws VendorBulkUploadException {
+		
+		log.info("Entering validateUploadedFile of {}", this.getClass().getSimpleName());
 		
 		if (!(FileManagementConstant.XLS_MIME_TYPE.equals(file.getContentType())
 				|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())
@@ -28,10 +32,14 @@ public class VendorBulkUploadValidator {
 						&& FileManagementConstant.FIXED.equals(fileStructure)) {
 			throw new VendorBulkUploadException(ErrorCode.FILE_CONFIG_DOESNOT_MATCH);
 		}
+		
+		log.info("Exiting validateUploadedFile of {}", this.getClass().getSimpleName());
 	}
 
 	public void validateInvoiceDetails(VendorBulkUploadRest vendorBulkUploadRest) throws VendorBulkUploadException {
 
+		log.info("Entering validateInvoiceDetails of {}", this.getClass().getSimpleName());
+		
 		if (vendorBulkUploadRest.getInvoiceNumber() == null) {
 			throw new VendorBulkUploadException(ErrorCode.INVOICE_NUMBER_MISSING);
 		}
@@ -40,7 +48,7 @@ public class VendorBulkUploadValidator {
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
 		if (vendorBulkUploadRest.getInvoiceDate() == null) {
-			throw new VendorBulkUploadException(ErrorCode.MANDATORY_FIELD_MISSING, "Invoice date",
+			throw new VendorBulkUploadException(ErrorCode.INVALID_DATE, "Invoice date",
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
 		if (vendorBulkUploadRest.getVendorCode() == null) {
@@ -66,6 +74,7 @@ public class VendorBulkUploadValidator {
 					vendorBulkUploadRest.getInvoiceNumber());
 		}
 
+		log.info("Exiting validateInvoiceDetails of {}", this.getClass().getSimpleName());
 	}
 
 }

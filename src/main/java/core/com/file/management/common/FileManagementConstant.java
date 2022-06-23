@@ -32,7 +32,7 @@ public class FileManagementConstant {
 	public static final String FILE_CONFIG_DOESNOT_EXISTS = "File configuration does not exists for the current user";
 	public static final String DEAFULT_SORT_FIELD = "id";
 	public static final Integer DEFAULT_PAGE_SIZE = 20;
-	public static final Integer DEAFULT_PAGE_NUM = 1;
+	public static final Integer DEAFULT_PAGE_NUM = 0;
 	public static final String BULK_UPLOAD = "BULK_UPLOAD";
 	public static final String LINE_DELIMITER = "\r\n";
 	public static final String ADDITIONAL_FIELD = "additionalField";
@@ -42,5 +42,7 @@ public class FileManagementConstant {
 	public static final String XLS_MIME_TYPE = "application/vnd.ms-excel";
 	public static final String TXT_MIME_TYPE = "text/plain";
 	public static final String STATUS_PENDING = "Pending";
+	public static final String FILE_DTLS_FETCH_SUCCESS = "File details fetched successfully";
+	public static final String FILE_DTLS_DOESNOT_EXISTS = "No file details found for the current user";
 	
 }

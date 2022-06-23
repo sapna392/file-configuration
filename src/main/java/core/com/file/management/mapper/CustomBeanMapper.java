@@ -5,14 +5,13 @@ import org.dozer.loader.api.BeanMappingBuilder;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class CustomBeanMapper extends DozerBeanMapper{
+public class CustomBeanMapper extends DozerBeanMapper {
 
 	BeanMappingBuilder beanMappingBuilder = new BeanMappingBuilder() {
-	      @Override
-	      protected void configure() {
-	    	  //insert custom mappings here
-	      }
+		@Override
+		protected void configure() {
+			// custom field mapping
+		}
 	};
-	
-	
 }
+	

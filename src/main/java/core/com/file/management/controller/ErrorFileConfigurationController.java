@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
-import core.com.file.management.model.FileConfigurationResponse;
-import core.com.file.management.model.FileConfigurationRest;
-import core.com.file.management.service.FileConfigurationService;
-import core.com.file.management.validator.FileConfigurationValidator;
+import core.com.file.management.model.ErrorFileConfigurationResponse;
+import core.com.file.management.model.ErrorFileConfigurationRest;
+import core.com.file.management.service.ErrorFileConfigurationService;
+import core.com.file.management.validator.ErrorFileConfigurationValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -28,35 +28,36 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping(value = "/fileConfiguration")
-@Api(value = "File configuration controller")
-public class FileConfigurationController {
-
-	@Autowired
-	private FileConfigurationValidator validator;
+@RequestMapping(value = "/errorFileConfiguration")
+@Api(value = "Error file configuration controller")
+public class ErrorFileConfigurationController {
 	
 	@Autowired
-	private FileConfigurationService fileConfigurationService;
-
+	private ErrorFileConfigurationValidator validator;
+	
+	@Autowired
+	private ErrorFileConfigurationService errorFileConfigurationService;
+	
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
 		binder.addValidators(validator);
 	}
-
-	@ApiOperation(value = "Submit file configuration")
-	@PostMapping(value = "/submit")
-	public ResponseEntity<FileConfigurationResponse> submitConfiguration(
-			@Validated @RequestBody FileConfigurationRest fileConfigurationRest) {
-
-		log.info("Entering bulkUpload of {}", this.getClass().getSimpleName());
-		log.info(fileConfigurationRest.toString());
-
-		FileConfigurationResponse configurationResponse = new FileConfigurationResponse();
-		FileConfigurationRest configurationRest= null;
+	
+	@ApiOperation(value = "Submit error file configuration")
+	@PostMapping("/submit")
+	public ResponseEntity<ErrorFileConfigurationResponse> submitConfiguration(
+			@Validated @RequestBody ErrorFileConfigurationRest errorFileConfigurationRest) {
+		
+		log.info("Entering submitConfiguration of {}" ,this.getClass().getSimpleName());
+		log.info(errorFileConfigurationRest.toString());
+		
+		ErrorFileConfigurationResponse configurationResponse = new ErrorFileConfigurationResponse();
+		ErrorFileConfigurationRest configurationRest = null;
 		HttpStatus status = null;
+		
 		try {
-			validator.validateFileConfiguration(fileConfigurationRest);
-			configurationRest = fileConfigurationService.saveFileConfiguration(fileConfigurationRest);
+			validator.validateFileConfiguration(errorFileConfigurationRest);
+			configurationRest = errorFileConfigurationService.saveFileConfiguration(errorFileConfigurationRest);
 			configurationResponse.setData(configurationRest);
 			configurationResponse.setStatus(FileManagementConstant.SUCCESS);
 			configurationResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
@@ -77,19 +78,19 @@ public class FileConfigurationController {
 		}
 
 		log.info(configurationResponse.toString());
-		log.info("Exiting bulkUpload of {}", this.getClass().getSimpleName());
-		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, status);
+		log.info("Exiting submitConfiguration of {}" ,this.getClass().getSimpleName());
+		return new ResponseEntity<ErrorFileConfigurationResponse>(configurationResponse, status);
 	}
-
-	@ApiOperation(value = "View file configuration")
-	@GetMapping(value = "/view")
-	public ResponseEntity<FileConfigurationResponse> viewConfiguration(
+	
+	@ApiOperation(value = "View error file configuration")
+	@GetMapping("/view")
+	public ResponseEntity<ErrorFileConfigurationResponse> viewConfiguration(
 			@RequestParam(name = "imCode", required = true) String imCode) {
 
 		log.info("Entering viewConfiguration of {}" ,this.getClass().getSimpleName());
 
-		FileConfigurationResponse configurationResponse = new FileConfigurationResponse();
-		FileConfigurationRest configurationRest = fileConfigurationService.viewFileConfiguration(imCode);
+		ErrorFileConfigurationResponse configurationResponse = new ErrorFileConfigurationResponse();
+		ErrorFileConfigurationRest configurationRest = errorFileConfigurationService.viewFileConfiguration(imCode);
 		configurationResponse.setData(configurationRest);
 		configurationResponse.setStatus(FileManagementConstant.SUCCESS);
 		configurationResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
@@ -102,7 +103,7 @@ public class FileConfigurationController {
 
 		log.info(configurationResponse.toString());
 		log.info("Exiting viewConfiguration of {}" ,this.getClass().getSimpleName());
-		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, HttpStatus.OK);
+		return new ResponseEntity<ErrorFileConfigurationResponse>(configurationResponse, HttpStatus.OK);
 	}
-	
+
 }

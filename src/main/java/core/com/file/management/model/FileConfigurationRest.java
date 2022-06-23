@@ -3,7 +3,7 @@ package core.com.file.management.model;
 import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @ApiModel(value = "File configuration model", 
@@ -13,16 +13,16 @@ public class FileConfigurationRest implements Serializable{
 
 	private static final long serialVersionUID = -5081204324974166611L;
 	
-	@ApiParam(value = "IM Code")
+	@ApiModelProperty(value = "IM Code")
 	private String imCode;
 	
-	@ApiParam(value = "File structure")
+	@ApiModelProperty(value = "File structure")
 	private String fileStructure;
 
-	@ApiParam(value = "Delimiter")
+	@ApiModelProperty(value = "Delimiter")
 	private String fileDelimiter;
 
-	@ApiParam(value = "File configuration fields")
+	@ApiModelProperty(value = "File configuration fields")
 	private FileConfigurationFields configurationFields;
 
 }

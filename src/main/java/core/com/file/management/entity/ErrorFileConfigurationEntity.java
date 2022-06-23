@@ -20,11 +20,11 @@ import lombok.Setter;
 @Entity
 @Table(name = "COM_REVRSE_FILE_CONFG")
 @Getter @Setter
-public class ReverseFileConfigurationEntity extends AbstractEntity{
+public class ErrorFileConfigurationEntity extends AbstractEntity{
 	
-	public ReverseFileConfigurationEntity() {}
+	public ErrorFileConfigurationEntity() {}
 	
-	public ReverseFileConfigurationEntity(String fileStructure, String fileDelimiter, String fileId, String referenceNo, 
+	public ErrorFileConfigurationEntity(String fileStructure, String fileDelimiter, String fileId, String referenceNo, 
 			String creationTime, String reversalDate,String invoiceNumber, String invoiceAmount, String invoiceDate, 
 			String vendorCode, String vendorName, String status, String statusDescription, String echequeNo,
 			Date created, String createdBy) {
@@ -47,7 +47,7 @@ public class ReverseFileConfigurationEntity extends AbstractEntity{
 		this.setCreatedBy(createdBy);
 	}
 
-	public ReverseFileConfigurationEntity(String fileStructure, String fileDelimiter, String fileId, String referenceNo, 
+	public ErrorFileConfigurationEntity(String fileStructure, String fileDelimiter, String fileId, String referenceNo, 
 			String creationTime, String reversalDate,String invoiceNumber, String invoiceAmount, String invoiceDate, 
 			String vendorCode, String vendorName, String status, String statusDescription, String echequeNo, 
 			String additionalField1, String additionalField2, String additionalField3, String additionalField4, 

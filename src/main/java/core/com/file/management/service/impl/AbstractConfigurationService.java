@@ -1,6 +1,3 @@
-/**
- * created by supro
- */
 package core.com.file.management.service.impl;
 
 import java.util.ArrayList;
@@ -20,7 +17,9 @@ import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.model.AdditionalConfigField;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AbstractConfigurationService {
 
 	@Autowired
@@ -28,6 +27,9 @@ public class AbstractConfigurationService {
 
 	public void populateEntityAdditionalFields(List<AdditionalConfigField> additionalConfigFieldList,
 			Object fileConfigurationEntity) throws FileConfigurationException {
+		
+		log.info("Entering populateEntityAdditionalFields of {}", this.getClass().getSimpleName());
+		
 		Map<String, String> fileConfigEntityMap = new HashMap<>();
 		int additionalFieldCount = 1;
 		if (CollectionUtils.isNotEmpty(additionalConfigFieldList)) {
@@ -48,9 +50,13 @@ public class AbstractConfigurationService {
 		} catch (JsonProcessingException e) {
 			throw new FileConfigurationException(ErrorCode.FILE_CONFIGURATION_ERROR);
 		} 
+		log.info("Exiting populateEntityAdditionalFields of {}", this.getClass().getSimpleName());
 	}
 
 	public List<AdditionalConfigField> getAdditionalConfigList(Map<String, String> configMap) {
+		
+		log.info("Exiting getAdditionalConfigList of {}", this.getClass().getSimpleName());
+		
 		List<AdditionalConfigField> additionalConfigFieldList = new ArrayList<>();
 		int additionalFieldCount = 1;
 		for (Map.Entry<String, String> entry : configMap.entrySet()) {
@@ -66,6 +72,8 @@ public class AbstractConfigurationService {
 				additionalFieldCount++;
 			}
 		}
+		
+		log.info("Exiting getAdditionalConfigList of {}", this.getClass().getSimpleName());
 		return additionalConfigFieldList;
 	}
 

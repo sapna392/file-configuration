@@ -27,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,14 +37,22 @@ import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.repo.BulkUploadFileRepo;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class FileConfigurationUtil {
+	
+	@Value("${core.scfu.simple.date.format}")
+	private String SIMPLE_DATE_FORMAT;
 
 	@Autowired
 	BulkUploadFileRepo uploadFileRepo;
 
 	public List<String> readFromExcelWorkbook(InputStream inputStream) throws VendorBulkUploadException {
+		
+		log.info("Entering readFromExcelWorkbook of {}", this.getClass().getSimpleName());
+		
 		List<String> contentList = new ArrayList<>();
 		try (XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
 			XSSFSheet sheet = workbook.getSheetAt(0);
@@ -56,7 +65,7 @@ public class FileConfigurationUtil {
 					if (cell.getCellType() == CellType.STRING) {
 						sbInside.append(cell.getStringCellValue());
                     } else if(DateUtil.isCellDateFormatted(cell)){
-						sbInside.append(new SimpleDateFormat("dd/MM/yyyy").format(cell.getDateCellValue()));
+						sbInside.append(new SimpleDateFormat(SIMPLE_DATE_FORMAT).format(cell.getDateCellValue()));
                     }else if (cell.getCellType() == CellType.NUMERIC) {
                     	sbInside.append(cell.getNumericCellValue());
                     }
@@ -67,12 +76,19 @@ public class FileConfigurationUtil {
 		} catch (IOException ioe) {
 			throw new VendorBulkUploadException(ErrorCode.FILE_PROCESSING_ERROR);
 		}
+		
+		log.info("Exiting readFromExcelWorkbook of {}", this.getClass().getSimpleName());
 		return contentList;
 	}
 
 	public synchronized String getContentHash(String content) throws NoSuchAlgorithmException {
+		
+		log.info("Entering getContentHash of {}", this.getClass().getSimpleName());
+		
 		MessageDigest digest = MessageDigest.getInstance(FileManagementConstant.ENCRYPTION_FUNCTION);
 		byte[] digestByte = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+		
+		log.info("Exiting getContentHash of {}", this.getClass().getSimpleName());
 		return bytesToHex(digestByte);
 	}
 
@@ -90,6 +106,8 @@ public class FileConfigurationUtil {
 
 	public Pageable getPageable(String dir, String sortBy, Integer size, Integer page) {
 
+		log.info("Entering getPageable of {}", this.getClass().getSimpleName());
+		
 		if (StringUtils.isBlank(sortBy)) {
 			sortBy = FileManagementConstant.DEAFULT_SORT_FIELD;
 		}
@@ -106,11 +124,14 @@ public class FileConfigurationUtil {
 				: Sort.by(sortBy).descending();
 
 		Pageable pageable = PageRequest.of(page, size, sort);
+		
+		log.info("Exiting getPageable of {}", this.getClass().getSimpleName());
 		return pageable;
 	}
 
 	public String getGuid(String operation) {
 
+		log.info("Entering getGuid of {}", this.getClass().getSimpleName());
 		String guid = UUID.randomUUID().toString();
 
 		switch (operation) {
@@ -123,19 +144,31 @@ public class FileConfigurationUtil {
 				break;
 			}
 		}
+		
+		log.info("Exiting getGuid of {}", this.getClass().getSimpleName());
 		return guid;
 	}
 
 	public String getFilePath(String hashKey) {
+		
+		log.info("Entering getFilePath of {}", this.getClass().getSimpleName());
+		
 		String path = hashKey.substring(0, 2) + "/" + hashKey.substring(2, 4) + "/";
+		
+		log.info("Exiting getFilePath of {}", this.getClass().getSimpleName());
 		return "src/main/resources/" + path;
 	}
 
 	public ByteArrayInputStream writeToCsvFile(List<String> sortedConfifMapKeys) throws IOException {
+		
+		log.info("Entering writeToCsvFile of {}", this.getClass().getSimpleName());
+		
 		try (final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 				final CSVPrinter printer = new CSVPrinter(new PrintWriter(stream), CSVFormat.DEFAULT)) {
 			printer.printRecord(sortedConfifMapKeys);
 			printer.flush();
+			
+			log.info("Exiting writeToCsvFile of {}", this.getClass().getSimpleName());
 			return new ByteArrayInputStream(stream.toByteArray());
 		} catch (final IOException e) {
 			throw new IOException(ErrorCode.FILE_DOWNLOADING_ERROR);
@@ -143,6 +176,9 @@ public class FileConfigurationUtil {
 	}
 
 	public ByteArrayInputStream writeToTxtFile(List<String> sortedConfifMapKeys, String delimiter) throws IOException {
+		
+		log.info("Entering writeToTxtFile of {}", this.getClass().getSimpleName());
+		
 		try (final ByteArrayOutputStream stream = new ByteArrayOutputStream();) {
 			StringBuilder sb = new StringBuilder();
 			for (String field : sortedConfifMapKeys) {
@@ -152,6 +188,8 @@ public class FileConfigurationUtil {
 				}
 			}
 			stream.writeBytes(StringUtils.chop(sb.toString()).getBytes());
+			
+			log.info("Exiting writeToTxtFile of {}", this.getClass().getSimpleName());
 			return new ByteArrayInputStream(stream.toByteArray());
 		} catch (final IOException e) {
 			throw new IOException(ErrorCode.FILE_DOWNLOADING_ERROR);
@@ -160,6 +198,9 @@ public class FileConfigurationUtil {
 	}
 
 	public ByteArrayInputStream writeToXlsFile(List<String> sortedConfifMapKeys) throws IOException {
+		
+		log.info("Entering writeToXlsFile of {}", this.getClass().getSimpleName());
+		
 		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
 			Sheet sheet = workbook.createSheet();
 			Row row = sheet.createRow(0);
@@ -168,6 +209,8 @@ public class FileConfigurationUtil {
 				row.createCell(cellCount).setCellValue(field);
 			}
 			workbook.write(stream);
+			
+			log.info("Exiting writeToXlsFile of {}", this.getClass().getSimpleName());
 			return new ByteArrayInputStream(stream.toByteArray());
 		} catch (IOException e) {
 			throw new IOException(ErrorCode.FILE_DOWNLOADING_ERROR);
