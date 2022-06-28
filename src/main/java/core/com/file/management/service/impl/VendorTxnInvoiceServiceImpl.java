@@ -80,11 +80,17 @@ public class VendorTxnInvoiceServiceImpl implements VendorTxnInvoiceService {
 	@Override
 	public List<VendorTxnInvoiceRest> authorizeTransaction(List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList) {
 		
+		log.info("Entering authorizeTransaction of {}", this.getClass().getSimpleName());
+		
 		List<VendorTxnInvoiceEntity> vendorTxnInvoiceEntityList = vendorTxnInvoiceRestList.stream()
 				.map(vtir -> mapper.map(vtir, VendorTxnInvoiceEntity.class)).collect(Collectors.toList());
+		vendorTxnInvoiceEntityList = vendorTxnInvoiceRepo.saveAll(vendorTxnInvoiceEntityList);
+
+		List<VendorTxnInvoiceRest> savedVendorTxnInvoiceRestList = vendorTxnInvoiceEntityList.stream()
+				.map(vtie -> mapper.map(vtie, VendorTxnInvoiceRest.class)).collect(Collectors.toList());
 		
-		
-		return null;
+		log.info("Exiting authorizeTransaction of {}", this.getClass().getSimpleName());
+		return savedVendorTxnInvoiceRestList;
 	}
 
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import core.com.file.management.common.FileManagementConstant;
-import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.VendorTxnInvoiceResponse;
 import core.com.file.management.model.VendorTxnInvoiceRest;
 import core.com.file.management.service.VendorTxnInvoiceService;
