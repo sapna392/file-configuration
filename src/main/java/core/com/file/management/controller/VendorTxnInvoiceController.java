@@ -65,17 +65,11 @@ public class VendorTxnInvoiceController {
 		log.info("Entering authorizeTransaction of {}", this.getClass().getSimpleName());
 		
 		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = new VendorTxnInvoiceResponse();
-		try {
-			vendorTxnInvoiceRestList = vendorTxnInvoiceService.authorizeTransaction(vendorTxnInvoiceRestList);
-			vendorTxnInvoiceResponse.setData(vendorTxnInvoiceRestList);
-			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
-			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
-			vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.SUCCESS);
-		} catch (VendorBulkUploadException fce) {
-			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.FAILURE);
-			vendorTxnInvoiceResponse.setStatus_msg(fce.getMessage());
-		}
+		vendorTxnInvoiceRestList = vendorTxnInvoiceService.authorizeTransaction(vendorTxnInvoiceRestList);
+		vendorTxnInvoiceResponse.setData(vendorTxnInvoiceRestList);
+		vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+		vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
+		vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.SUCCESS);
 		
 		log.info("Exiting authorizeTransaction of {}", this.getClass().getSimpleName());
 		return new ResponseEntity<VendorTxnInvoiceResponse>(vendorTxnInvoiceResponse,
