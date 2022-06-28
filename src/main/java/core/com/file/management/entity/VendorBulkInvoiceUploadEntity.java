@@ -2,18 +2,21 @@ package core.com.file.management.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import core.com.file.management.model.VendorInvoiceStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "COM_FILE_UPLD_DTLS")
 @Getter @Setter
-public class BulkUploadFileEntity extends AbstractEntity {
+public class VendorBulkInvoiceUploadEntity extends AbstractEntity {
 
 	@Id
 	@Column(name = "FILE_ID")
@@ -27,7 +30,8 @@ public class BulkUploadFileEntity extends AbstractEntity {
 	private String name;
 
 	@Column(name = "FILE_STATUS")
-	private String status;
+	@Enumerated(EnumType.STRING)
+	private VendorInvoiceStatus status;
 
 	@Column(name = "FILE_TYPE")
 	private String type;

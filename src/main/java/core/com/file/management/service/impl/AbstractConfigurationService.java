@@ -60,15 +60,12 @@ public class AbstractConfigurationService {
 		List<AdditionalConfigField> additionalConfigFieldList = new ArrayList<>();
 		int additionalFieldCount = 1;
 		for (Map.Entry<String, String> entry : configMap.entrySet()) {
-			if (entry.getKey().contains(FileManagementConstant.ADDITIONAL_FIELD + additionalFieldCount) && StringUtils
+			if (FileManagementConstant.ADDITIONAL_DB_FIELDS.contains(entry.getKey()) && StringUtils
 					.isNotBlank(configMap.get(FileManagementConstant.ADDITIONAL_FIELD + additionalFieldCount))) {
-				AdditionalConfigField additionalConfigField = new AdditionalConfigField();
 				String[] additionalFields = configMap
 						.get(FileManagementConstant.ADDITIONAL_FIELD + additionalFieldCount)
 						.split(FileManagementConstant.PIPE_DELIMITER);
-				additionalConfigField.setConfigName(additionalFields[0]);
-				additionalConfigField.setConfigPos(additionalFields[1]);
-				additionalConfigFieldList.add(additionalConfigField);
+				additionalConfigFieldList.add(new AdditionalConfigField(additionalFields[0], additionalFields[1]));
 				additionalFieldCount++;
 			}
 		}

@@ -10,7 +10,7 @@ import lombok.Data;
 
 @ApiModel(value = "Bulk upload model", description = "This class is used to retrieve the uploaded file details")
 @Data
-public class BulkUploadFileRest {
+public class VendorBulkInvoiceUploadRest {
 	
 	@ApiModelProperty(value = "File id")
 	private String id;

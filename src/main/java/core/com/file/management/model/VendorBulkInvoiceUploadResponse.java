@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class BulkUploadFileResponse {
+public class VendorBulkInvoiceUploadResponse {
 
 	@ApiModelProperty(value = "Status")
 	private String status;
@@ -21,6 +21,6 @@ public class BulkUploadFileResponse {
 	private  ResponseMetadata metadata;
 	
 	@ApiModelProperty(value = "Records of the list of files")
-	private List<BulkUploadFileRest> data;
+	private List<VendorBulkInvoiceUploadRest> data;
 	
 }

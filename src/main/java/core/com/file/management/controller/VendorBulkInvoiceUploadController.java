@@ -1,7 +1,9 @@
 package core.com.file.management.controller;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -22,8 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.exception.VendorBulkUploadException;
-import core.com.file.management.model.BulkUploadFileResponse;
-import core.com.file.management.service.VendorBulkUploadFileService;
+import core.com.file.management.model.VendorBulkInvoiceUploadResponse;
+import core.com.file.management.model.VendorTxnInvoiceResponse;
+import core.com.file.management.model.VendorTxnInvoiceRest;
+import core.com.file.management.service.VendorBulkInvoiceUploadService;
 import core.com.file.management.util.FileConfigurationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,47 +38,45 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping(value = "/bulkUpload")
 @Api(value = "Vendor invoice bulk upload controller")
-public class VendorBulkUploadController {
+public class VendorBulkInvoiceUploadController {
 
 	@Autowired
-	VendorBulkUploadFileService vendorBulkUploadService;
+	VendorBulkInvoiceUploadService vendorBulkInvoiceUploadService;
 
 	@Autowired
 	FileConfigurationUtil fileManagementUtil;
 
 	@ApiOperation(value = "Upload bulk vendor invoice file")
 	@PostMapping("/")
-	public ResponseEntity<BulkUploadFileResponse> bulkUpload(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<VendorTxnInvoiceResponse> bulkUpload(@RequestParam("file") MultipartFile file,
 			@RequestParam(name = "imCode", required = true) String imCode) {
 
 		log.info("Entering bulkUpload of {}", this.getClass().getSimpleName());
 
-		BulkUploadFileResponse bulkUploadFileResponse = new BulkUploadFileResponse();
-		String response = null;
-		HttpStatus status = null;
+		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = new VendorTxnInvoiceResponse();
+		List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList = null;
 		try {
-			response = vendorBulkUploadService.upload(file, imCode);
-			bulkUploadFileResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
-			bulkUploadFileResponse.setStatus(FileManagementConstant.SUCCESS);
-			bulkUploadFileResponse.setStatus_msg(response);
-			status = HttpStatus.OK;
+			vendorTxnInvoiceRestList = vendorBulkInvoiceUploadService.upload(file, imCode);
+			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
+			vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.FILE_UPLOADED_SUCCESS);
+			vendorTxnInvoiceResponse.setData(vendorTxnInvoiceRestList);
 		} catch (VendorBulkUploadException fce) {
-			response = fce.getMessage();
-			bulkUploadFileResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-			bulkUploadFileResponse.setStatus(FileManagementConstant.FAILURE);
-			bulkUploadFileResponse.setStatus_msg(response);
-			status = HttpStatus.BAD_REQUEST;
+			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.FAILURE);
+			vendorTxnInvoiceResponse.setStatus_msg(fce.getMessage());
 		}
 
-		log.info(bulkUploadFileResponse.toString());
+		log.info(vendorTxnInvoiceResponse.toString());
 		log.info("Exiting bulkUpload of {}", this.getClass().getSimpleName());
 
-		return new ResponseEntity<BulkUploadFileResponse>(bulkUploadFileResponse, status);
+		return new ResponseEntity<VendorTxnInvoiceResponse>(vendorTxnInvoiceResponse,
+				CollectionUtils.isNotEmpty(vendorTxnInvoiceRestList) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "View details of the uploaded files")
 	@GetMapping("/")
-	public ResponseEntity<BulkUploadFileResponse> getFileUploadDetails(
+	public ResponseEntity<VendorBulkInvoiceUploadResponse> getFileUploadDetails(
 			@RequestParam(name = "imCode", required = true) String imCode,
 			@RequestParam(name = "status", required = false) String status,
 			@RequestParam(name = "dir", required = false) String dir,
@@ -85,12 +87,15 @@ public class VendorBulkUploadController {
 		log.info("Entering getFileUploadDetails of {}", this.getClass().getSimpleName());
 
 		Pageable pageable = fileManagementUtil.getPageable(dir, sortBy, size, page);
-		BulkUploadFileResponse fileResponse = vendorBulkUploadService.getUploadFileDetails(pageable, status, imCode);
+		VendorBulkInvoiceUploadResponse fileResponse = vendorBulkInvoiceUploadService.getUploadFileDetails(pageable,
+				status, imCode);
 
 		log.info(fileResponse.toString());
 		log.info("Exiting getFileUploadDetails of {}", this.getClass().getSimpleName());
 
-		return new ResponseEntity<BulkUploadFileResponse>(fileResponse, HttpStatus.OK);
+		return new ResponseEntity<VendorBulkInvoiceUploadResponse>(fileResponse,
+				FileManagementConstant.SUCCESS.equals(fileResponse.getStatus()) ? HttpStatus.OK
+						: HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Download the file by file id")
@@ -104,7 +109,7 @@ public class VendorBulkUploadController {
 		InputStreamResource resource;
 		MultipartFile multipartFile = null;
 		try {
-			multipartFile = vendorBulkUploadService.getUploadFileById(fileId, userId, userType);
+			multipartFile = vendorBulkInvoiceUploadService.getUploadFileById(fileId, userId, userType);
 			resource = new InputStreamResource(multipartFile.getInputStream());
 		} catch (VendorBulkUploadException | IOException e) {
 			return ResponseEntity.internalServerError().body(null);
@@ -128,7 +133,7 @@ public class VendorBulkUploadController {
 
 		InputStreamResource resource;
 		try {
-			resource = new InputStreamResource(vendorBulkUploadService.download(imCode, userType, mediaType));
+			resource = new InputStreamResource(vendorBulkInvoiceUploadService.download(imCode, userType, mediaType));
 		} catch (VendorBulkUploadException e) {
 			return ResponseEntity.internalServerError().body(null);
 		}

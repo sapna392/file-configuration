@@ -4,13 +4,16 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import core.com.file.management.model.VendorInvoiceStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,41 +23,46 @@ import lombok.Setter;
 public class VendorTxnInvoiceEntity extends AbstractEntity{
 	
 	@Id
-	@Column(name = "FILE_ID")
+	@Column(name = "TXN_INVC_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	
+	@Column(name = "FILE_ID")
+	private String fileId;
+	
+	@Column(name = "IM_CODE")
+	private String imCode;
 
-	@JsonProperty("InvoiceNumber")
 	@Column(name = "INVC_NMBR")
 	private String invoiceNumber;
 
-	@JsonProperty("InvoiceAmount")
 	@Column(name = "INVC_AMNT")
 	private String invoiceAmount;
 
-	@JsonProperty("InvoiceDate")
 	@Column(name = "INVC_DATE")
+	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date invoiceDate;
 
-	@JsonProperty("VendorCode")
 	@Column(name = "VNDR_CODE")
 	private String vendorCode;
 	
-	@JsonProperty("VendorName")
 	@Column(name = "VNDR_NAME")
 	private String vendorName;
 
-	@JsonProperty("DueDate")
 	@Column(name = "DUE_DATE")
+	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date dueDate;
 
-	@JsonProperty("PaymentIdentifier")
 	@Column(name = "PYMT_IDFR")
 	private String paymentIdentifier;
 	
-	@JsonProperty("ProcessingDate")
 	@Column(name = "PRCSSNG_DATE")
+	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date processingDate;
+	
+	@Column(name = "INVC_STATUS")
+	@Enumerated(EnumType.STRING)
+	private VendorInvoiceStatus status;
 	
 	@Column(name = "ADDITIONAL_FIELD_1")
 	private String additionalField1 = null;

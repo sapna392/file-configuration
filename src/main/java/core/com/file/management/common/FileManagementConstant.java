@@ -11,6 +11,8 @@ public class FileManagementConstant {
 	public static final String FILE_CONFIG_DELIMITER = "fileDelimiter";
 	public static final String DELIMITER = "delimiterField";
 	public static final String FIXED = "fixed";
+	public static final String CREATED = "created";
+	public static final String UPDATED = "updated";
 	public static final String COMMA = ",";
 	public static final String PIPE = "|";
 	public static final String PIPE_DELIMITER = "\\|";
@@ -41,8 +43,10 @@ public class FileManagementConstant {
 	public static final String CSV_MIME_TYPE = "text/csv";
 	public static final String XLS_MIME_TYPE = "application/vnd.ms-excel";
 	public static final String TXT_MIME_TYPE = "text/plain";
-	public static final String STATUS_PENDING = "Pending";
 	public static final String FILE_DTLS_FETCH_SUCCESS = "File details fetched successfully";
 	public static final String FILE_DTLS_DOESNOT_EXISTS = "No file details found for the current user";
+	public static final String TXN_DTLS_FETCH_SUCCESS = "Transaction details fetched successfully";
+	public static final String TXN_DTLS_DOESNOT_EXISTS = "No transaction details found for the current user";
+	public static final String INVALID_STATUS = "Invalid status value %s";
 	
 }

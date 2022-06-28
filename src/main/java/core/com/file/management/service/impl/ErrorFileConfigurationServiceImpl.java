@@ -1,6 +1,5 @@
 package core.com.file.management.service.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +45,6 @@ public class ErrorFileConfigurationServiceImpl extends AbstractConfigurationServ
 				populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
 						errorFileConfigurationEntity);
 			}
-			errorFileConfigurationEntity.setCreated(new Date());
 			errorFileConfigurationEntity.setCreatedBy(configurationRest.getImCode());
 		} else {
 			List<ErrorFileConfigurationEntity> existingConfigurationEntityList = errorFileConfigurationRepo
@@ -70,11 +68,9 @@ public class ErrorFileConfigurationServiceImpl extends AbstractConfigurationServ
 			errorFileConfigurationEntity.setStatus(configurationFields.getStatus());
 			errorFileConfigurationEntity.setStatusDescription(configurationFields.getStatusDescription());
 			errorFileConfigurationEntity.setEchequeNo(configurationFields.getEchequeNo());
-			errorFileConfigurationEntity.setUpdated(new Date());
 			populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(),
 					errorFileConfigurationEntity);
 		}
-		errorFileConfigurationEntity.setUpdated(new Date());
 		errorFileConfigurationEntity.setUpdatedBy(configurationRest.getImCode());
 
 		errorFileConfigurationRepo.save(errorFileConfigurationEntity);

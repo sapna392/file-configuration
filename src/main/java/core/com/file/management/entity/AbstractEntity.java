@@ -16,14 +16,14 @@ public class AbstractEntity {
 	
 	@Column(name = "CREATED" , nullable = false )
 	@Temporal(value = TemporalType.TIMESTAMP)
-	private Date created;
+	private Date created = new Date();
 	
 	@Column(name = "CREATED_BY" , nullable = false )
 	private String createdBy;
 	
 	@Column(name = "UPDATED" , nullable = false )
 	@Temporal(value = TemporalType.TIMESTAMP)
-	private Date updated;
+	private Date updated = new Date();
 	
 	@Column(name = "UPDATED_BY" , nullable = false )
 	private String updatedBy;

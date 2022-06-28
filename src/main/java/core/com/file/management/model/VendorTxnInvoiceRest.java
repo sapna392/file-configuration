@@ -1,26 +1,31 @@
 package core.com.file.management.model;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import core.com.file.management.mapper.DateDeSerializer;
-import core.com.file.management.mapper.DoubleDeSerializer;
 import lombok.Data;
 
 @Data
-public class VendorBulkUploadRest {
+public class VendorTxnInvoiceRest {
 
+	private String imCode;
+	
+	private String fileId;
+	
 	@JsonAlias("InvoiceNumber")
 	private String invoiceNumber;
 
 	@JsonAlias("InvoiceAmount")
-	@JsonDeserialize(using = DoubleDeSerializer.class)
 	private Double invoiceAmount;
 
 	@JsonAlias("InvoiceDate")
 	@JsonDeserialize(using = DateDeSerializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	private Date invoiceDate;
 
 	@JsonAlias("VendorCode")
@@ -31,6 +36,7 @@ public class VendorBulkUploadRest {
 
 	@JsonAlias("DueDate")
 	@JsonDeserialize(using = DateDeSerializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	private Date dueDate;
 
 	@JsonAlias("PaymentIdentifier")
@@ -38,7 +44,12 @@ public class VendorBulkUploadRest {
 	
 	@JsonAlias("ProcessingDate")
 	@JsonDeserialize(using = DateDeSerializer.class)
-	private Date processingDate;
+	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
+	private Date processingDate;	
+	
+	private VendorInvoiceStatus status;
+	
+	List<AdditionalConfigField> additionalConfigFieldList;
 	
 	private String additionalField1;
 	

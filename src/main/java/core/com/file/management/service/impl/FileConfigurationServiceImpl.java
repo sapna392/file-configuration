@@ -1,6 +1,5 @@
 package core.com.file.management.service.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +54,6 @@ public class FileConfigurationServiceImpl extends AbstractConfigurationService i
 			if (CollectionUtils.isNotEmpty(configurationFields.getAdditionalFieldList())) {
 				populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(), fileConfigurationEntity);
 			}
-			fileConfigurationEntity.setCreated(new Date());
 			fileConfigurationEntity.setCreatedBy(configurationRest.getImCode());
 		} else {
 			List<FileConfigurationEntity> existingConfigurationEntityList = fileConfigurationRepo
@@ -77,7 +75,6 @@ public class FileConfigurationServiceImpl extends AbstractConfigurationService i
 			populateEntityAdditionalFields(configurationFields.getAdditionalFieldList(), fileConfigurationEntity);
 			
 		}
-		fileConfigurationEntity.setUpdated(new Date());
 		fileConfigurationEntity.setUpdatedBy(configurationRest.getImCode());
 
 		fileConfigurationRepo.save(fileConfigurationEntity);

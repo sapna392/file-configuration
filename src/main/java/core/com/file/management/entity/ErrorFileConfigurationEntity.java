@@ -1,6 +1,3 @@
-/**
- * created by supro
- */
 package core.com.file.management.entity;
 
 import java.util.Date;
@@ -18,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "COM_REVRSE_FILE_CONFG")
+@Table(name = "COM_ERROR_FILE_CONFG")
 @Getter @Setter
 public class ErrorFileConfigurationEntity extends AbstractEntity{
 	
@@ -81,7 +78,7 @@ public class ErrorFileConfigurationEntity extends AbstractEntity{
 	}
 
 	@Id
-	@Column(name = "FILE_CONFIG_ID")
+	@Column(name = "ERROR_FILE_CONFIG_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id = null;
 	

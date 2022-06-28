@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.VendorBulkUploadException;
-import core.com.file.management.repo.BulkUploadFileRepo;
+import core.com.file.management.repo.VendorBulkInvoiceUploadRepo;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -47,7 +47,7 @@ public class FileConfigurationUtil {
 	private String SIMPLE_DATE_FORMAT;
 
 	@Autowired
-	BulkUploadFileRepo uploadFileRepo;
+	VendorBulkInvoiceUploadRepo uploadFileRepo;
 
 	public List<String> readFromExcelWorkbook(InputStream inputStream) throws VendorBulkUploadException {
 		
