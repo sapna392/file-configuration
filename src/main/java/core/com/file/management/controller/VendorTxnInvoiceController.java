@@ -59,17 +59,18 @@ public class VendorTxnInvoiceController {
 	}
 	
 	@PutMapping("/")
-	public ResponseEntity<VendorTxnInvoiceResponse> authorizeTransaction(@RequestBody List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList){
-		
+	public ResponseEntity<VendorTxnInvoiceResponse> authorizeTransaction(
+			@RequestBody List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList) {
+
 		log.info("Entering authorizeTransaction of {}", this.getClass().getSimpleName());
-		
+
 		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = new VendorTxnInvoiceResponse();
 		vendorTxnInvoiceRestList = vendorTxnInvoiceService.authorizeTransaction(vendorTxnInvoiceRestList);
 		vendorTxnInvoiceResponse.setData(vendorTxnInvoiceRestList);
 		vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
 		vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
 		vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.SUCCESS);
-		
+
 		log.info("Exiting authorizeTransaction of {}", this.getClass().getSimpleName());
 		return new ResponseEntity<VendorTxnInvoiceResponse>(vendorTxnInvoiceResponse,
 				FileManagementConstant.SUCCESS.equals(vendorTxnInvoiceResponse.getStatus()) ? HttpStatus.OK
