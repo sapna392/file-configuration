@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileManagementConstant {
+	
+	private FileManagementConstant() {}
 
 	public static final String SUCCESS = "success";
 	public static final String FAILURE = "failure";
@@ -29,6 +31,7 @@ public class FileManagementConstant {
 	public static final String CSV_FILE = ".csv";
 	public static final String ENCRYPTION_FUNCTION = "SHA-256";
 	public static final String FILE_UPLOADED_SUCCESS = "File uploaded successfully";
+	public static final String FILE_UPLOADED_FAILED = "File cannot be uploaded. Please reffer to the error file";
 	public static final String FILE_CONFIG_SAVE_SUCCESS = "File configuration saved successfully";
 	public static final String FILE_CONFIG_FETCH_SUCCESS = "File configuration fetched successfully";
 	public static final String FILE_CONFIG_DOESNOT_EXISTS = "File configuration does not exists for the current user";

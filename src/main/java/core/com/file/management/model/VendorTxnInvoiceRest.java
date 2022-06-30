@@ -17,32 +17,32 @@ public class VendorTxnInvoiceRest {
 	
 	private String fileId;
 	
-	@JsonAlias("InvoiceNumber")
+	@JsonAlias("Invoice Number")
 	private String invoiceNumber;
 
-	@JsonAlias("InvoiceAmount")
+	@JsonAlias("Invoice Amount")
 	private Double invoiceAmount;
 
-	@JsonAlias("InvoiceDate")
+	@JsonAlias("Invoice Date")
 	@JsonDeserialize(using = DateDeSerializer.class)
 	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	private Date invoiceDate;
 
-	@JsonAlias("VendorCode")
+	@JsonAlias("Vendor Code")
 	private String vendorCode;
 	
-	@JsonAlias("VendorName")
+	@JsonAlias("Vendor Name")
 	private String vendorName;
 
-	@JsonAlias("DueDate")
+	@JsonAlias("Due Date")
 	@JsonDeserialize(using = DateDeSerializer.class)
 	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	private Date dueDate;
 
-	@JsonAlias("PaymentIdentifier")
+	@JsonAlias("Payment Identifier")
 	private String paymentIdentifier;
 	
-	@JsonAlias("ProcessingDate")
+	@JsonAlias("Processing Date")
 	@JsonDeserialize(using = DateDeSerializer.class)
 	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	private Date processingDate;	

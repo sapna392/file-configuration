@@ -4,5 +4,6 @@ public enum VendorInvoiceStatus {
 
 	PENDING,
 	PENDING_AUHTORIZATION,
-	AUTHORIZED;
+	AUTHORIZED,
+	FAILED;
 }

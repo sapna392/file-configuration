@@ -78,7 +78,7 @@ public class FileConfigurationController {
 
 		log.info(configurationResponse.toString());
 		log.info("Exiting bulkUpload of {}", this.getClass().getSimpleName());
-		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, status);
+		return new ResponseEntity<>(configurationResponse, status);
 	}
 
 	@ApiOperation(value = "View file configuration")
@@ -102,7 +102,7 @@ public class FileConfigurationController {
 
 		log.info(configurationResponse.toString());
 		log.info("Exiting viewConfiguration of {}" ,this.getClass().getSimpleName());
-		return new ResponseEntity<FileConfigurationResponse>(configurationResponse, HttpStatus.OK);
+		return new ResponseEntity<>(configurationResponse, HttpStatus.OK);
 	}
 	
 }

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 public class DateDeSerializer extends StdDeserializer<Date> {
 	
 	@Value("${core.scfu.local.date.format}")
-	public String LOCAL_DATE_PATTERN;
+	public String localDatePatter;
 
 	private static final long serialVersionUID = 3027403532323368996L;
 
@@ -30,7 +30,7 @@ public class DateDeSerializer extends StdDeserializer<Date> {
 	public Date deserialize(JsonParser p, DeserializationContext ctxt) {
 		try {
 			String dateString = p.readValueAs(String.class);
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LOCAL_DATE_PATTERN)
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(localDatePatter)
 					.withResolverStyle(ResolverStyle.STRICT);
 			return java.sql.Date.valueOf(LocalDate.parse(dateString, formatter));
 		} catch (IOException | DateTimeParseException exp) {

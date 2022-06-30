@@ -81,35 +81,35 @@ public class FileConfigurationEntity extends AbstractEntity {
 	@Column(name = "FILE_DLMTR")
 	private String fileDelimiter;
 
-	@JsonProperty("InvoiceNumber")
+	@JsonProperty("Invoice Number")
 	@Column(name = "INVC_NMBR")
 	private String invoiceNumber;
 
-	@JsonProperty("InvoiceAmount")
+	@JsonProperty("Invoice Amount")
 	@Column(name = "INVC_AMNT")
 	private String invoiceAmount;
 
-	@JsonProperty("InvoiceDate")
+	@JsonProperty("Invoice Date")
 	@Column(name = "INVC_DATE")
 	private String invoiceDate;
 
-	@JsonProperty("VendorCode")
+	@JsonProperty("Vendor Code")
 	@Column(name = "VNDR_CODE")
 	private String vendorCode;
 	
-	@JsonProperty("VendorName")
+	@JsonProperty("Vendor Name")
 	@Column(name = "VNDR_NAME")
 	private String vendorName;
 
-	@JsonProperty("DueDate")
+	@JsonProperty("Due Date")
 	@Column(name = "DUE_DATE")
 	private String dueDate;
 
-	@JsonProperty("PaymentIdentifier")
+	@JsonProperty("Payment Identifier")
 	@Column(name = "PYMT_IDFR")
 	private String paymentIdentifier;
 	
-	@JsonProperty("ProcessingDate")
+	@JsonProperty("Processing Date")
 	@Column(name = "PRCSSNG_DATE")
 	private String processingDate;
 	

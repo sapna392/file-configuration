@@ -1,7 +1,5 @@
 package core.com.file.management.model;
 
-import java.util.List;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -20,7 +18,7 @@ public class VendorTxnInvoiceResponse {
 	@ApiModelProperty(value = "Medata regarding the list of files")
 	private  ResponseMetadata metadata;
 	
-	@ApiModelProperty(value = "File details along with the transaction details of the file")
-	private List<VendorTxnInvoiceRest> data;
-
+	@ApiModelProperty(value = "Bulk upload file details ")
+	private VendorBulkInvoiceUploadRest data;
+	
 }

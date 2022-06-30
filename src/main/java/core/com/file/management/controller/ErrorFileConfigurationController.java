@@ -79,7 +79,7 @@ public class ErrorFileConfigurationController {
 
 		log.info(configurationResponse.toString());
 		log.info("Exiting submitConfiguration of {}" ,this.getClass().getSimpleName());
-		return new ResponseEntity<ErrorFileConfigurationResponse>(configurationResponse, status);
+		return new ResponseEntity<>(configurationResponse, status);
 	}
 	
 	@ApiOperation(value = "View error file configuration")
@@ -103,7 +103,7 @@ public class ErrorFileConfigurationController {
 
 		log.info(configurationResponse.toString());
 		log.info("Exiting viewConfiguration of {}" ,this.getClass().getSimpleName());
-		return new ResponseEntity<ErrorFileConfigurationResponse>(configurationResponse, HttpStatus.OK);
+		return new ResponseEntity<>(configurationResponse, HttpStatus.OK);
 	}
 
 }

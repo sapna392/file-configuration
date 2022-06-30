@@ -1,7 +1,6 @@
 package core.com.file.management.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,8 @@ import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.exception.VendorBulkUploadException;
 import core.com.file.management.model.VendorBulkInvoiceUploadResponse;
+import core.com.file.management.model.VendorBulkInvoiceUploadRest;
 import core.com.file.management.model.VendorTxnInvoiceResponse;
-import core.com.file.management.model.VendorTxnInvoiceRest;
 import core.com.file.management.service.VendorBulkInvoiceUploadService;
 import core.com.file.management.util.FileConfigurationUtil;
 import io.swagger.annotations.Api;
@@ -54,24 +53,30 @@ public class VendorBulkInvoiceUploadController {
 		log.info("Entering bulkUpload of {}", this.getClass().getSimpleName());
 
 		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = new VendorTxnInvoiceResponse();
-		List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList = null;
+		VendorBulkInvoiceUploadRest vendorBulkInvoiceUploadRest = null;
 		try {
-			vendorTxnInvoiceRestList = vendorBulkInvoiceUploadService.upload(file, imCode);
-			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
-			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
-			vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.FILE_UPLOADED_SUCCESS);
-			vendorTxnInvoiceResponse.setData(vendorTxnInvoiceRestList);
+			vendorBulkInvoiceUploadRest = vendorBulkInvoiceUploadService.upload(file, imCode);
+			vendorTxnInvoiceResponse.setData(vendorBulkInvoiceUploadRest);
+			if(CollectionUtils.isEmpty(vendorBulkInvoiceUploadRest.getVendorTxnInvoiceRestList())) {
+				vendorTxnInvoiceResponse.setStatus(FileManagementConstant.FAILURE);
+				vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+				vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.FILE_UPLOADED_FAILED);
+			} else {
+				vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
+				vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+				vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.FILE_UPLOADED_SUCCESS);
+			}
 		} catch (VendorBulkUploadException fce) {
-			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
-			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.FAILURE);
 			vendorTxnInvoiceResponse.setStatus_msg(fce.getMessage());
+			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.FAILURE);
+			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
 		}
 
 		log.info(vendorTxnInvoiceResponse.toString());
 		log.info("Exiting bulkUpload of {}", this.getClass().getSimpleName());
 
-		return new ResponseEntity<VendorTxnInvoiceResponse>(vendorTxnInvoiceResponse,
-				CollectionUtils.isNotEmpty(vendorTxnInvoiceRestList) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(vendorTxnInvoiceResponse,
+				vendorBulkInvoiceUploadRest != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "View details of the uploaded files")
@@ -93,7 +98,7 @@ public class VendorBulkInvoiceUploadController {
 		log.info(fileResponse.toString());
 		log.info("Exiting getFileUploadDetails of {}", this.getClass().getSimpleName());
 
-		return new ResponseEntity<VendorBulkInvoiceUploadResponse>(fileResponse,
+		return new ResponseEntity<>(fileResponse,
 				FileManagementConstant.SUCCESS.equals(fileResponse.getStatus()) ? HttpStatus.OK
 						: HttpStatus.BAD_REQUEST);
 	}

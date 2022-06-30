@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FileConfigurationUtil {
 	
 	@Value("${core.scfu.simple.date.format}")
-	private String SIMPLE_DATE_FORMAT;
+	private String simpleDateFormat;
 
 	@Autowired
 	VendorBulkInvoiceUploadRepo uploadFileRepo;
@@ -59,13 +59,13 @@ public class FileConfigurationUtil {
 			Iterator<?> rowIterator = sheet.rowIterator();
 			while (rowIterator.hasNext()) {
 				Row row = (XSSFRow) rowIterator.next();
-				StringBuffer sbInside = new StringBuffer();
+				StringBuilder sbInside = new StringBuilder();
 				for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++) {
 					Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 					if (cell.getCellType() == CellType.STRING) {
 						sbInside.append(cell.getStringCellValue());
                     } else if(DateUtil.isCellDateFormatted(cell)){
-						sbInside.append(new SimpleDateFormat(SIMPLE_DATE_FORMAT).format(cell.getDateCellValue()));
+						sbInside.append(new SimpleDateFormat(simpleDateFormat).format(cell.getDateCellValue()));
                     }else if (cell.getCellType() == CellType.NUMERIC) {
                     	sbInside.append(cell.getNumericCellValue());
                     }

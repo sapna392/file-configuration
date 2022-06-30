@@ -1,8 +1,11 @@
 package core.com.file.management.model;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +25,7 @@ public class VendorBulkInvoiceUploadRest {
 	private String name;
 	
 	@ApiModelProperty(value = "Status")
-	private String status;
+	private VendorInvoiceStatus status;
 	
 	@ApiModelProperty(value = "Type")
 	private String type;
@@ -39,5 +42,13 @@ public class VendorBulkInvoiceUploadRest {
 	@ApiModelProperty(value = "File upload date")
 	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	private Date created;
+	
+	@ApiModelProperty(value = "File details along with the transaction details of the file")
+	@JsonInclude(Include.NON_NULL)
+	private List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList;
+	
+	@ApiModelProperty(value = "Error details of the file")
+	@JsonInclude(Include.NON_NULL)
+	private List<VendorTxnInvoiceErrorRest> vendorTxnInvoiceErrorRestList;
 	
 }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import core.com.file.management.common.FileManagementConstant;
+import core.com.file.management.exception.VendorBulkUploadException;
+import core.com.file.management.model.VendorBulkInvoiceUploadRest;
 import core.com.file.management.model.VendorTxnInvoiceResponse;
 import core.com.file.management.model.VendorTxnInvoiceRest;
 import core.com.file.management.service.VendorTxnInvoiceService;
@@ -34,7 +37,34 @@ public class VendorTxnInvoiceController {
 	private VendorTxnInvoiceService vendorTxnInvoiceService;
 
 	@Autowired
-	private FileConfigurationUtil fileManagementUtil;
+	private FileConfigurationUtil fileConfigurationUtil;
+	
+	@ApiOperation(value = "Submit invoice after review")
+	@PostMapping("/")
+	public ResponseEntity<VendorTxnInvoiceResponse> submitVendorTxnInvoiceDetails(
+			@RequestParam(name = "imCode", required = true) String imCode,
+			@RequestBody VendorBulkInvoiceUploadRest vendorBulkInvoiceUploadRest) {
+
+		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = new VendorTxnInvoiceResponse();
+		try {
+			VendorBulkInvoiceUploadRest savedVendorBulkInvoiceUploadRest = vendorTxnInvoiceService
+					.sumbitVendorTxnDetails(vendorBulkInvoiceUploadRest, imCode);
+			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
+			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+			vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.FILE_UPLOADED_SUCCESS);
+			vendorTxnInvoiceResponse.setData(savedVendorBulkInvoiceUploadRest);
+		} catch (VendorBulkUploadException fce) {
+			vendorTxnInvoiceResponse.setStatus_msg(fce.getMessage());
+			vendorTxnInvoiceResponse.setStatus(FileManagementConstant.FAILURE);
+			vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+		}
+
+		log.info(vendorTxnInvoiceResponse.toString());
+		log.info("Exiting bulkUpload of {}", this.getClass().getSimpleName());
+
+		return new ResponseEntity<>(vendorTxnInvoiceResponse,
+				vendorBulkInvoiceUploadRest != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+	}
 
 	@ApiOperation(value = "Upload bulk vendor invoice file")
 	@GetMapping("/")
@@ -48,12 +78,12 @@ public class VendorTxnInvoiceController {
 
 		log.info("Entering getVendorTxnInvoiceDetails of {}", this.getClass().getSimpleName());
 
-		Pageable pageable = fileManagementUtil.getPageable(dir, sortBy, size, page);
+		Pageable pageable = fileConfigurationUtil.getPageable(dir, sortBy, size, page);
 		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = vendorTxnInvoiceService.getVendorTxnInvoiceDetails(pageable,
 				status, imCode);
 
 		log.info("Exiting getVendorTxnInvoiceDetails of {}", this.getClass().getSimpleName());
-		return new ResponseEntity<VendorTxnInvoiceResponse>(vendorTxnInvoiceResponse,
+		return new ResponseEntity<>(vendorTxnInvoiceResponse,
 				FileManagementConstant.SUCCESS.equals(vendorTxnInvoiceResponse.getStatus()) ? HttpStatus.OK
 						: HttpStatus.BAD_REQUEST);
 	}
@@ -66,13 +96,13 @@ public class VendorTxnInvoiceController {
 
 		VendorTxnInvoiceResponse vendorTxnInvoiceResponse = new VendorTxnInvoiceResponse();
 		vendorTxnInvoiceRestList = vendorTxnInvoiceService.authorizeTransaction(vendorTxnInvoiceRestList);
-		vendorTxnInvoiceResponse.setData(vendorTxnInvoiceRestList);
-		vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
 		vendorTxnInvoiceResponse.setStatus(FileManagementConstant.SUCCESS);
 		vendorTxnInvoiceResponse.setStatus_msg(FileManagementConstant.SUCCESS);
+		vendorTxnInvoiceResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+		vendorTxnInvoiceResponse.getData().setVendorTxnInvoiceRestList(vendorTxnInvoiceRestList);
 
 		log.info("Exiting authorizeTransaction of {}", this.getClass().getSimpleName());
-		return new ResponseEntity<VendorTxnInvoiceResponse>(vendorTxnInvoiceResponse,
+		return new ResponseEntity<>(vendorTxnInvoiceResponse,
 				FileManagementConstant.SUCCESS.equals(vendorTxnInvoiceResponse.getStatus()) ? HttpStatus.OK
 						: HttpStatus.BAD_REQUEST);
 	}
