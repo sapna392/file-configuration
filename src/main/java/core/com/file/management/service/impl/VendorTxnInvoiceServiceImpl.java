@@ -75,8 +75,8 @@ public class VendorTxnInvoiceServiceImpl implements VendorTxnInvoiceService {
 	public VendorBulkInvoiceUploadRest sumbitVendorTxnDetails(VendorBulkInvoiceUploadRest vendorBulkInvoiceUploadRest,
 			String imCode) throws VendorBulkUploadException {
 
-		VendorBulkInvoiceUploadEntity vendorBulkInvoiceUploadEntity = mapper.map(vendorBulkInvoiceUploadRest,
-				VendorBulkInvoiceUploadEntity.class);
+		VendorBulkInvoiceUploadEntity vendorBulkInvoiceUploadEntity = new VendorBulkInvoiceUploadEntity();
+		mapper.map(vendorBulkInvoiceUploadRest, vendorBulkInvoiceUploadEntity);
 
 		String contentHash;
 		try {
@@ -93,7 +93,8 @@ public class VendorTxnInvoiceServiceImpl implements VendorTxnInvoiceService {
 
 		List<VendorTxnInvoiceEntity> vendorTxnInvoiceEntityList = vendorBulkInvoiceUploadRest
 				.getVendorTxnInvoiceRestList().stream().map(vtir -> {
-					VendorTxnInvoiceEntity entity = mapper.map(vtir, VendorTxnInvoiceEntity.class);
+					VendorTxnInvoiceEntity entity = new VendorTxnInvoiceEntity();
+					mapper.map(vtir, entity);
 					entity.setFileId(savedEntity.getId().toString());
 					entity.setCreatedBy(imCode);
 					entity.setUpdatedBy(imCode);

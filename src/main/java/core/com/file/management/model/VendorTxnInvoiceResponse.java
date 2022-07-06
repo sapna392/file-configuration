@@ -23,6 +23,6 @@ public class VendorTxnInvoiceResponse implements Serializable{
 	private  ResponseMetadata metadata;
 	
 	@ApiModelProperty(value = "Bulk upload file details ")
-	private VendorBulkInvoiceUploadRest data;
+	private VendorBulkInvoiceUploadRest data = new VendorBulkInvoiceUploadRest();
 	
 }
