@@ -3,12 +3,10 @@ package core.com.file.management.model;
 import java.io.Serializable;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
-@Data
-public class VendorTxnInvoiceResponse implements Serializable{
-	
-	private static final long serialVersionUID = 2849496911202540026L;
+public class ErrorInvoiceFileResponse implements Serializable{
+
+	private static final long serialVersionUID = -1576184242711963896L;
 
 	@ApiModelProperty(value = "Status")
 	private String status;
@@ -22,7 +20,7 @@ public class VendorTxnInvoiceResponse implements Serializable{
 	@ApiModelProperty(value = "Medata regarding the list of files")
 	private  ResponseMetadata metadata;
 	
-	@ApiModelProperty(value = "Bulk upload file details ")
-	private VendorBulkInvoiceUploadRest data;
+	@ApiModelProperty(value = "Reverse file details ")
+	private ErrorInvoiceFileRest errorInvoiceFileRest;
 	
 }

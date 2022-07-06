@@ -2,7 +2,6 @@ package core.com.file.management.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -13,12 +12,19 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class VendorTxnInvoiceRest implements Serializable{
+public class ErrorInvoiceFileRest implements Serializable{
 
-	private static final long serialVersionUID = 337851141409928592L;
-
+	private static final long serialVersionUID = 6025558677052568506L;
+	
 	@ApiModelProperty(value = "File id")
 	private String fileId;
+	
+	@ApiModelProperty(value = "Reference no")
+	private String referenceNo;
+	
+	@ApiModelProperty(value = "Creation time")
+	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
+	private Date creationTime;
 	
 	@JsonAlias("Invoice Number")
 	@ApiModelProperty(value = "Invoice number")
@@ -26,42 +32,35 @@ public class VendorTxnInvoiceRest implements Serializable{
 
 	@JsonAlias("Invoice Amount")
 	@ApiModelProperty(value = "Invoice amount")
-	private Double invoiceAmount;
+	private String invoiceAmount;
 
 	@JsonAlias("Invoice Date")
 	@JsonDeserialize(using = DateDeSerializer.class)
 	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
 	@ApiModelProperty(value = "Invoice date")
 	private Date invoiceDate;
-
+	
+	@JsonDeserialize(using = DateDeSerializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
+	@ApiModelProperty(value = "Reversal date")
+	private Date reversalDate;
+	
 	@JsonAlias("Vendor Code")
 	@ApiModelProperty(value = "Vendor code")
 	private String vendorCode;
-	
+
 	@JsonAlias("Vendor Name")
 	@ApiModelProperty(value = "Vendor name")
 	private String vendorName;
 
-	@JsonAlias("Due Date")
-	@JsonDeserialize(using = DateDeSerializer.class)
-	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
-	private Date dueDate;
-
-	@JsonAlias("Payment Identifier")
-	@ApiModelProperty(value = "Payment identifier")
-	private String paymentIdentifier;
-	
-	@JsonAlias("Processing Date")
-	@JsonDeserialize(using = DateDeSerializer.class)
-	@JsonFormat(shape = JsonFormat.Shape.ANY, pattern="dd/MM/yyyy")
-	@ApiModelProperty(value = "Processing date")
-	private Date processingDate;	
-	
 	@ApiModelProperty(value = "Status")
 	private VendorInvoiceStatus status;
+
+	@ApiModelProperty(value = "Status description")
+	private String statusDescription;
 	
-	@ApiModelProperty(value = "List of additonal fields")
-	private List<AdditionalConfigField> additionalConfigFieldList;
+	@ApiModelProperty(value = "Echeque no")
+	private String echequeNo;
 	
 	@ApiModelProperty(value = "Additional field 1")
 	private String additionalField1;
@@ -92,5 +91,4 @@ public class VendorTxnInvoiceRest implements Serializable{
 	
 	@ApiModelProperty(value = "Additional field 10")
 	private String additionalField10;
-	
 }

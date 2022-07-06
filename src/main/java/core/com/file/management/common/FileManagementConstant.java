@@ -18,12 +18,15 @@ public class FileManagementConstant {
 	public static final String COMMA = ",";
 	public static final String PIPE = "|";
 	public static final String PIPE_DELIMITER = "\\|";
-	public static final List<String> FILE_TYPE = new ArrayList<String>(List.of(".txt", ".xls", ".csv"));
-	public static final List<String> ADDITIONAL_FIELDS = new ArrayList<String>(
+	public static final List<String> FILE_TYPE = new ArrayList<>(List.of(".txt", ".xls", ".csv"));
+	public static final String ADDITIONAL_FIELD = "additionalField";
+	public static final String ADDITIONAL_FIELD_1 = "additionalField1";
+	public static final String ADDITIONAL_FIELD_LIST = "additionalFieldList";
+	public static final List<String> ADDITIONAL_FIELDS = new ArrayList<>(
 			List.of("ADDITIONAL_DETAILS_1", "ADDITIONAL_DETAILS_2", "ADDITIONAL_DETAILS_3", "ADDITIONAL_DETAILS_4",
 					"ADDITIONAL_DETAILS_5", "ADDITIONAL_DETAILS_6", "ADDITIONAL_DETAILS_7", "ADDITIONAL_DETAILS_8",
 					"ADDITIONAL_DETAILS_9", "ADDITIONAL_DETAILS_10"));
-	public static final List<String> ADDITIONAL_DB_FIELDS = new ArrayList<String>(List.of("additionalField1",
+	public static final List<String> ADDITIONAL_DB_FIELDS = new ArrayList<>(List.of(ADDITIONAL_FIELD_1,
 			"additionalField2", "additionalField3", "additionalField4", "additionalField5", "additionalField6",
 			"additionalField7", "additionalField8", "additionalField9", "additionalField10"));
 	public static final String TXT_FILE = ".txt";
@@ -40,9 +43,6 @@ public class FileManagementConstant {
 	public static final Integer DEAFULT_PAGE_NUM = 0;
 	public static final String BULK_UPLOAD = "BULK_UPLOAD";
 	public static final String LINE_DELIMITER = "\r\n";
-	public static final String ADDITIONAL_FIELD = "additionalField";
-	public static final String ADDITIONAL_FIELD_1 = "additionalField1";
-	public static final String ADDITIONAL_FIELD_LIST = "additionalFieldList";
 	public static final String CSV_MIME_TYPE = "text/csv";
 	public static final String XLS_MIME_TYPE = "application/vnd.ms-excel";
 	public static final String TXT_MIME_TYPE = "text/plain";
@@ -51,5 +51,7 @@ public class FileManagementConstant {
 	public static final String TXN_DTLS_FETCH_SUCCESS = "Transaction details fetched successfully";
 	public static final String TXN_DTLS_DOESNOT_EXISTS = "No transaction details found for the current user";
 	public static final String INVALID_STATUS = "Invalid status value %s";
+	public static final String ERROR_FILE = "ERROR_FILE";
+	public static final String REVERSAL_FILE = "REVERSAL_FILE";
 	
 }

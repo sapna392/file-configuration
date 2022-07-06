@@ -16,5 +16,6 @@ public interface VendorTxnInvoiceService {
 
 	public VendorTxnInvoiceResponse getVendorTxnInvoiceDetails(Pageable pageable, String status, String imCode);
 
-	public List<VendorTxnInvoiceRest> authorizeTransaction(List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList);
+	public List<VendorTxnInvoiceRest> authorizeTransaction(String imCode,
+			List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList) throws VendorBulkUploadException;
 }

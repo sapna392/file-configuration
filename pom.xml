@@ -6,7 +6,7 @@
 	<artifactId>file-management</artifactId>
 	<version>1.0.0</version>
 	<packaging>war</packaging>
-	<name>file-configuration</name>
+	<name>file-management</name>
 	<description>This is the module for file configuration in IM admin screen</description>
 
 	<properties>

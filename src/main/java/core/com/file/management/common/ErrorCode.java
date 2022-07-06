@@ -1,6 +1,8 @@
 package core.com.file.management.common;
 
 public class ErrorCode {
+	
+	private ErrorCode() {}
 
 	public static final String EMPTY_IM_CODE = "IM code is empty";
 	public static final String DELIMITER_REQ = "Delimiter is required if the file structure is delimiter";
@@ -14,7 +16,7 @@ public class ErrorCode {
 	public static final String EMPTY_FILE_CONTENT = "File is empty";
 	public static final String INVALID_FILE_TYPE = "Invalid File Format. The file has to be in .txt or . xls or .csv format";
 	public static final String FILE_SIZE_EXCEEDED = "File size cannot exceed 2 MB";
-	public static final String FILE_PROCESSING_ERROR = "Error while processing the file";
+	public static final String FILE_PROCESSING_ERROR = "Error while processing the file. Please contact admin";
 	public static final String FILE_UPLOADING_ERROR = "Error while uploading the file. Please contact admin";
 	public static final String FILE_RETRIEVING_ERROR = "Error while retriveing file configuration details. Please contact admin";
 	public static final String FILE_DOWNLOADING_ERROR = "Error while downloading the file. Please contact admin";
@@ -27,5 +29,6 @@ public class ErrorCode {
 	public static final String INVALID_AMOUNT = "Invalid amount value";
 	public static final String PROCESSING_DATE_EARLY = "Processing date is earlier than the invoice date for invoice code %s";
 	public static final String EARLIER_PROCESSING_DATE = "Processing date is earlier than current date for invoice code %s";
-
+	public static final String ERROR_FILE_CONFIG_DOESNOT_EXISTS = "Error/Reverse file configuration does not exists for the current user";
+	public static final String ERROR_FILE_PROCESSING_ERROR = "Error creating error/processing file. Please contact admin";
 }

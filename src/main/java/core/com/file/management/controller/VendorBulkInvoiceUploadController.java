@@ -23,11 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.exception.FileConfigurationException;
 import core.com.file.management.exception.VendorBulkUploadException;
+import core.com.file.management.model.ErrorUploadFileDetailsResponse;
 import core.com.file.management.model.VendorBulkInvoiceUploadResponse;
 import core.com.file.management.model.VendorBulkInvoiceUploadRest;
 import core.com.file.management.model.VendorTxnInvoiceResponse;
 import core.com.file.management.service.VendorBulkInvoiceUploadService;
-import core.com.file.management.util.FileConfigurationUtil;
+import core.com.file.management.util.FileManagementUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class VendorBulkInvoiceUploadController {
 	VendorBulkInvoiceUploadService vendorBulkInvoiceUploadService;
 
 	@Autowired
-	FileConfigurationUtil fileManagementUtil;
+	FileManagementUtil fileManagementUtil;
 
 	@ApiOperation(value = "Upload bulk vendor invoice file")
 	@PostMapping("/")
@@ -106,15 +107,15 @@ public class VendorBulkInvoiceUploadController {
 	@ApiOperation(value = "Download the file by file id")
 	@GetMapping("/{fileId}")
 	public ResponseEntity<Resource> getFileById(@RequestParam(name = "fileId") Long fileId,
-			@RequestParam(name = "userId", required = true) String userId,
-			@RequestParam(name = "userType", required = true) String userType) {
+			@RequestParam(name = "imCode", required = true) String imCode,
+			@RequestParam(name = "isErrorFile") Boolean isErrorFile) {
 
 		log.info("Entering getFileById of {}", this.getClass().getSimpleName());
 
 		InputStreamResource resource;
 		MultipartFile multipartFile = null;
 		try {
-			multipartFile = vendorBulkInvoiceUploadService.getUploadFileById(fileId, userId, userType);
+			multipartFile = vendorBulkInvoiceUploadService.getUploadFileById(fileId, imCode, isErrorFile);
 			resource = new InputStreamResource(multipartFile.getInputStream());
 		} catch (VendorBulkUploadException | IOException e) {
 			return ResponseEntity.internalServerError().body(null);
@@ -131,14 +132,13 @@ public class VendorBulkInvoiceUploadController {
 	public ResponseEntity<Resource> downloadSampleFile(
 			@RequestHeader(name = "Content-Type", required = true) final String mediaType,
 			@RequestHeader(name = "Content-disposition", required = true) final String fileName,
-			@RequestParam(name = "imCode", required = true) String imCode,
-			@RequestParam(name = "userType", required = true) String userType) throws FileConfigurationException {
+			@RequestParam(name = "imCode", required = true) String imCode) throws FileConfigurationException {
 
 		log.info("Entering downloadSampleFile of {}", this.getClass().getSimpleName());
 
 		InputStreamResource resource;
 		try {
-			resource = new InputStreamResource(vendorBulkInvoiceUploadService.download(imCode, userType, mediaType));
+			resource = new InputStreamResource(vendorBulkInvoiceUploadService.download(imCode, mediaType));
 		} catch (VendorBulkUploadException e) {
 			return ResponseEntity.internalServerError().body(null);
 		}
@@ -148,5 +148,30 @@ public class VendorBulkInvoiceUploadController {
 		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, fileName)
 				.contentType(MediaType.parseMediaType(mediaType)).body(resource);
 	}
+	
+	@ApiOperation(value = "Get reverse or error file details")
+	@GetMapping("/reverseFile")
+	public ResponseEntity<ErrorUploadFileDetailsResponse> getReverseFileDetails(
+			@RequestParam(name = "imCode", required = true) String imCode,
+			@RequestParam(name = "isErrorFile", required = true) Boolean isErrorFile,
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "dir", required = false) String dir,
+			@RequestParam(name = "sortBy", required = false) String sortBy,
+			@RequestParam(name = "size", required = false) Integer size,
+			@RequestParam(name = "page", required = false) Integer page) {
 
+		log.info("Entering getReverseFileDetails of {}", this.getClass().getSimpleName());
+
+		Pageable pageable = fileManagementUtil.getPageable(dir, sortBy, size, page);
+		ErrorUploadFileDetailsResponse uploadFileDetailsResponse = vendorBulkInvoiceUploadService
+				.getReversalFileDetails(pageable, status, imCode, isErrorFile);
+
+		log.info(uploadFileDetailsResponse.toString());
+		log.info("Exiting getReverseFileDetails of {}", this.getClass().getSimpleName());
+
+		return new ResponseEntity<>(uploadFileDetailsResponse,
+				FileManagementConstant.SUCCESS.equals(uploadFileDetailsResponse.getStatus()) ? HttpStatus.OK
+						: HttpStatus.BAD_REQUEST);
+	}
+	
 }

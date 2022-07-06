@@ -1,5 +1,6 @@
 package core.com.file.management.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -13,8 +14,10 @@ import lombok.Data;
 
 @ApiModel(value = "Bulk upload model", description = "This class is used to retrieve the uploaded file details")
 @Data
-public class VendorBulkInvoiceUploadRest {
+public class VendorBulkInvoiceUploadRest implements Serializable{
 	
+	private static final long serialVersionUID = -706458078534192123L;
+
 	@ApiModelProperty(value = "File id")
 	private String id;
 	
@@ -49,6 +52,6 @@ public class VendorBulkInvoiceUploadRest {
 	
 	@ApiModelProperty(value = "Error details of the file")
 	@JsonInclude(Include.NON_NULL)
-	private List<VendorTxnInvoiceErrorRest> vendorTxnInvoiceErrorRestList;
+	private VendorTxnInvoiceErrorRest vendorTxnInvoiceErrorRest;
 	
 }

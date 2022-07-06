@@ -5,10 +5,20 @@ import lombok.Data;
 
 @Data
 public class VendorTxnInvoiceErrorRest {
-
-	@ApiModelProperty("Invoice number")
-	private String invoiceNumber;
 	
-	@ApiModelProperty(value = "Error description")
-	private String errorDescription;
+	public VendorTxnInvoiceErrorRest(){}
+	
+	public VendorTxnInvoiceErrorRest(String fileName, String fileType){
+		this.fileName = fileName;
+		this.fileType = fileType;
+	}
+
+	@ApiModelProperty("File name")
+	private String fileName;
+	
+	@ApiModelProperty(value = "File type")
+	private String fileType;
+	
+	@ApiModelProperty(value = "Error content")
+	private String fileContent;
 }

@@ -5,5 +5,6 @@ public enum VendorInvoiceStatus {
 	PENDING,
 	PENDING_AUHTORIZATION,
 	AUTHORIZED,
+	PROCESSED,
 	FAILED;
 }

@@ -49,6 +49,6 @@ public class ErrorFileConfigurationFields implements Serializable{
 	private String echequeNo;
 	
 	@ApiModelProperty(value = "List of additonal fields")
-	List<AdditionalConfigField> additionalFieldList = new ArrayList<AdditionalConfigField>();
+	private List<AdditionalConfigField> additionalFieldList = new ArrayList<>();
 	
 }

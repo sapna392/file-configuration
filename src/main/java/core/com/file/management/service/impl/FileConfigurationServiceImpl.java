@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import core.com.file.management.common.FileManagementConstant;
 import core.com.file.management.entity.FileConfigurationEntity;
 import core.com.file.management.exception.FileConfigurationException;
@@ -19,7 +17,7 @@ import core.com.file.management.model.FileConfigurationFields;
 import core.com.file.management.model.FileConfigurationRest;
 import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.service.FileConfigurationService;
-import core.com.file.management.util.FileConfigurationUtil;
+import core.com.file.management.util.FileManagementUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,10 +28,8 @@ public class FileConfigurationServiceImpl extends AbstractConfigurationService i
 	FileConfigurationRepo fileConfigurationRepo;
 
 	@Autowired
-	FileConfigurationUtil fileManagementUtil;
+	FileManagementUtil fileManagementUtil;
 
-	@Autowired
-	ObjectMapper objectMapper;
 
 	@Autowired
 	private Mapper mapper;

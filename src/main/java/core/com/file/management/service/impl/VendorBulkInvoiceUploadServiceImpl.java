@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,23 +30,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import core.com.file.management.common.ErrorCode;
 import core.com.file.management.common.FileManagementConstant;
+import core.com.file.management.entity.ErrorFileDetailsEntity;
 import core.com.file.management.entity.FileConfigurationEntity;
 import core.com.file.management.entity.VendorBulkInvoiceUploadEntity;
 import core.com.file.management.exception.VendorBulkUploadException;
+import core.com.file.management.model.ErrorUploadFileDetailsResponse;
+import core.com.file.management.model.ErrorUploadFileDetailsRest;
 import core.com.file.management.model.ResponseMetadata;
 import core.com.file.management.model.VendorBulkInvoiceUploadResponse;
 import core.com.file.management.model.VendorBulkInvoiceUploadRest;
 import core.com.file.management.model.VendorInvoiceStatus;
 import core.com.file.management.model.VendorTxnInvoiceErrorRest;
 import core.com.file.management.model.VendorTxnInvoiceRest;
+import core.com.file.management.repo.ErrorFileDetailsRepo;
 import core.com.file.management.repo.FileConfigurationRepo;
 import core.com.file.management.repo.VendorBulkInvoiceUploadRepo;
 import core.com.file.management.service.VendorBulkInvoiceUploadService;
-import core.com.file.management.util.FileConfigurationUtil;
+import core.com.file.management.util.FileManagementUtil;
 import core.com.file.management.validator.VendorBulkUploadValidator;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,8 +66,11 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 	private ObjectMapper objectMapper;
 	
 	@Autowired
-	private FileConfigurationUtil fileConfigurationUtil;
+	private FileManagementUtil fileManagementUtil;
 
+	@Autowired
+	private ErrorFileDetailsRepo errorFileDetailsRepo;
+	
 	@Autowired
 	private FileConfigurationRepo fileConfigurationRepo;
 	
@@ -82,13 +92,15 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 		FileConfigurationEntity fileConfigurationEntity = fileConfigurationEntityList.get(0);
 		vendorBulkUploadValidator.validateUploadedFile(file, fileConfigurationEntity.getFileStructure());
 
-		List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList = new ArrayList<>();
-		List<VendorTxnInvoiceErrorRest> vendorTxnInvoiceErrorRestList = new ArrayList<>();
-		VendorBulkInvoiceUploadRest vendorBulkInvoiceUploadRest = new VendorBulkInvoiceUploadRest();
 		List<String> contentList = null;
-
-		InputStream inputStream = null;
 		byte[] inputStreamByte = null;
+		InputStream inputStream = null;
+		Map<String, String> errorContentMap = new HashMap<>();
+		List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList = new ArrayList<>();
+		VendorBulkInvoiceUploadRest vendorBulkInvoiceUploadRest = new VendorBulkInvoiceUploadRest();
+		VendorTxnInvoiceErrorRest vendorTxnInvoiceErrorRest = new VendorTxnInvoiceErrorRest(file.getOriginalFilename(),
+				file.getContentType());
+		
 		try {
 			inputStream = file.getInputStream();
 			inputStreamByte = inputStream.readAllBytes();
@@ -96,7 +108,7 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 			throw new VendorBulkUploadException(ErrorCode.FILE_PROCESSING_ERROR);
 		}
 		if (FileManagementConstant.XLS_MIME_TYPE.equals(file.getContentType())) {
-			contentList = fileConfigurationUtil.readFromExcelWorkbook(inputStream);
+			contentList = fileManagementUtil.readFromExcelWorkbook(inputStream);
 		} else if (FileManagementConstant.TXT_MIME_TYPE.equals(file.getContentType())
 				|| FileManagementConstant.CSV_MIME_TYPE.equals(file.getContentType())) {
 			contentList = Arrays.asList(new String(inputStreamByte).split(FileManagementConstant.LINE_DELIMITER));
@@ -124,8 +136,7 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 						contentMap = mapBulkUploadFields(content, fileConfigurationEntity.getFileDelimiter(),
 								configMap);
 					}
-					mapToVendorTxnInvoiceRest(imCode, contentMap, vendorTxnInvoiceRestList,
-							vendorTxnInvoiceErrorRestList);
+					mapToVendorTxnInvoiceRest(contentMap, vendorTxnInvoiceRestList, errorContentMap);
 				} else if (FileManagementConstant.FIXED.equals(fileConfigurationEntity.getFileStructure())) {
 					for (Map.Entry<String, String> entry : configMap.entrySet()) {
 						String[] pos = null;
@@ -138,8 +149,7 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 						}
 						contentMap.put(entry.getKey(),
 								content.substring(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]) + 1));
-						mapToVendorTxnInvoiceRest(imCode, contentMap, vendorTxnInvoiceRestList,
-								vendorTxnInvoiceErrorRestList);
+						mapToVendorTxnInvoiceRest(contentMap, vendorTxnInvoiceRestList, errorContentMap);
 					}
 				}
 			}
@@ -170,7 +180,7 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 			contentList.remove(0);
 			for (String content : contentList) {
 				Map<String, String> contentMap = mapBulkUploadFields(content, FileManagementConstant.COMMA, configMap);
-				mapToVendorTxnInvoiceRest(imCode, contentMap, vendorTxnInvoiceRestList, vendorTxnInvoiceErrorRestList);
+				mapToVendorTxnInvoiceRest(contentMap, vendorTxnInvoiceRestList, errorContentMap);
 			}
 		}
 		
@@ -178,21 +188,21 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 		vendorBulkInvoiceUploadRest.setType(file.getContentType());
 		vendorBulkInvoiceUploadRest.setName(file.getOriginalFilename());
 		
-		if(CollectionUtils.isEmpty(vendorTxnInvoiceErrorRestList)) {
+		if(MapUtils.isEmpty(errorContentMap)) {
 			double totalInvoiceAmount = vendorTxnInvoiceRestList.stream()
 					.mapToDouble(VendorTxnInvoiceRest::getInvoiceAmount).sum();
 			vendorBulkInvoiceUploadRest.setTotalAmount(totalInvoiceAmount);
 			vendorBulkInvoiceUploadRest.setStatus(VendorInvoiceStatus.PENDING);
 			vendorBulkInvoiceUploadRest.setInvoiceCount(vendorTxnInvoiceRestList.size());
 			vendorBulkInvoiceUploadRest.setVendorTxnInvoiceRestList(vendorTxnInvoiceRestList);
-			String bulkFileGuid = fileConfigurationUtil.getGuid(FileManagementConstant.BULK_UPLOAD);
+			String bulkFileGuid = fileManagementUtil.getGuid(FileManagementConstant.BULK_UPLOAD);
 			vendorBulkInvoiceUploadRest.setGuid(bulkFileGuid);
 			
 			// Saving file to local starts
 			String contentHash = null;
 			try {
-				contentHash = fileConfigurationUtil.getContentHash(vendorBulkInvoiceUploadRest.getName());
-				String filePath = fileConfigurationUtil.getFilePath(contentHash);
+				contentHash = fileManagementUtil.getContentHash(vendorBulkInvoiceUploadRest.getName());
+				String filePath = fileManagementUtil.getFilePath(contentHash);
 				File savedFile = new File(filePath);
 				if (!savedFile.exists())
 					savedFile.mkdirs();
@@ -208,9 +218,17 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 			// Saving file to local ends
 			
 		} else {
+			String errorContentString = null;
+			try {
+				errorContentString = objectMapper.writeValueAsString(errorContentMap);
+			} catch (JsonProcessingException e) {
+				throw new VendorBulkUploadException(ErrorCode.FILE_PROCESSING_ERROR);
+			}
+			
 			vendorBulkInvoiceUploadRest.setStatus(VendorInvoiceStatus.FAILED);
-			vendorBulkInvoiceUploadRest.setInvoiceCount(vendorTxnInvoiceErrorRestList.size());
-			vendorBulkInvoiceUploadRest.setVendorTxnInvoiceErrorRestList(vendorTxnInvoiceErrorRestList);
+			vendorBulkInvoiceUploadRest.setInvoiceCount(errorContentMap.size());
+			vendorTxnInvoiceErrorRest.setFileContent(Base64.getEncoder().encodeToString(errorContentString.getBytes()));
+			vendorBulkInvoiceUploadRest.setVendorTxnInvoiceErrorRest(vendorTxnInvoiceErrorRest);
 		}
 
 		log.info("Exiting upload of {}", this.getClass().getSimpleName());
@@ -242,7 +260,7 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 						.map(bup -> mapper.map(bup, VendorBulkInvoiceUploadRest.class)).toList();
 				bulkInvoiceUploadResponse.setStatus_msg(FileManagementConstant.FILE_DTLS_FETCH_SUCCESS);
 			} else {
-				bulkInvoiceUploadResponse.setStatus_msg(FileManagementConstant.FILE_CONFIG_DOESNOT_EXISTS);
+				bulkInvoiceUploadResponse.setStatus_msg(FileManagementConstant.FILE_DTLS_DOESNOT_EXISTS);
 			}
 
 			ResponseMetadata metadata = new ResponseMetadata();
@@ -261,33 +279,37 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 	}
 
 	@Override
-	public MultipartFile getUploadFileById(Long id, String userId, String serType) throws VendorBulkUploadException {
+	public MultipartFile getUploadFileById(Long id, String imCode, Boolean isErrorFile)
+			throws VendorBulkUploadException {
 
 		log.info("Entering getUploadFileById of {}", this.getClass().getSimpleName());
 
-		VendorBulkInvoiceUploadEntity uploadFileEntity = vendorBulkInvoiceUploadRepo.getFileById(id, userId);
-		String filePath = fileConfigurationUtil.getFilePath(uploadFileEntity.getHash());
-		MultipartFile multipartFile = null;
-		try {
-			File file = new File(filePath, uploadFileEntity.getName());
-			DiskFileItem fileItem = new DiskFileItem("file", uploadFileEntity.getType(), false, file.getName(),
-					(int) file.length(), file.getParentFile());
-			fileItem.getOutputStream();
-			multipartFile = new CommonsMultipartFile(fileItem);
-		} catch (IOException e) {
-			throw new VendorBulkUploadException(ErrorCode.FILE_DOWNLOADING_ERROR);
+		String filePath = null;
+		String name = null;
+		String type = null;
+		if(isErrorFile == null) {
+			VendorBulkInvoiceUploadEntity uploadFileEntity = vendorBulkInvoiceUploadRepo.getFileById(id, imCode);
+			filePath = fileManagementUtil.getFilePath(uploadFileEntity.getHash());
+			name = uploadFileEntity.getName();
+			type = uploadFileEntity.getType();
+		} else {
+			ErrorFileDetailsEntity errorFileDetailsEntity = errorFileDetailsRepo.getFileById(id, imCode, isErrorFile);
+			name = errorFileDetailsEntity.getName();
+			type = errorFileDetailsEntity.getType();
 		}
+		
+		MultipartFile multipartFile = getMultipartFile(filePath, name, type);
 
 		log.info("Exiting getUploadFileById of {}", this.getClass().getSimpleName());
 		return multipartFile;
 	}
 
 	@Override
-	public InputStream download(String userId, String userType, String mediaType) throws VendorBulkUploadException {
+	public InputStream download(String imCode, String mediaType) throws VendorBulkUploadException {
 
 		log.info("Entering download of {}", this.getClass().getSimpleName());
 
-		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(userId);
+		List<FileConfigurationEntity> fileConfigurationEntityList = fileConfigurationRepo.getFileConfiguration(imCode);
 		ByteArrayInputStream byteArrayInputStream = null;
 		if (CollectionUtils.isNotEmpty(fileConfigurationEntityList)) {
 			Map<String, String> configMap = objectMapper.convertValue(fileConfigurationEntityList.get(0), Map.class);
@@ -313,13 +335,13 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 			try {
 				switch(mediaType) {
 					case FileManagementConstant.CSV_MIME_TYPE :
-						byteArrayInputStream = fileConfigurationUtil.writeToCsvFile(sortedConfigMapKeys);
+						byteArrayInputStream = fileManagementUtil.writeToCsvFile(sortedConfigMapKeys);
 						break;
 					case FileManagementConstant.XLS_MIME_TYPE :
-						byteArrayInputStream = fileConfigurationUtil.writeToXlsFile(sortedConfigMapKeys);
+						byteArrayInputStream = fileManagementUtil.writeToXlsFile(sortedConfigMapKeys);
 						break;
 					default :
-						byteArrayInputStream = fileConfigurationUtil.writeToTxtFile(sortedConfigMapKeys,
+						byteArrayInputStream = fileManagementUtil.writeToTxtFile(sortedConfigMapKeys,
 								configMap.get(FileManagementConstant.FILE_CONFIG_DELIMITER));
 						break;
 				}
@@ -332,6 +354,51 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 		
 		log.info("Exiting download of {}", this.getClass().getSimpleName());
 		return byteArrayInputStream;
+	}
+	
+	@Override
+	public ErrorUploadFileDetailsResponse getReversalFileDetails(Pageable pageable, String status, String imCode,
+			Boolean isErrorFile) {
+
+		log.info("Entering getReversalFileDetails of {}", this.getClass().getSimpleName());
+
+		ErrorUploadFileDetailsResponse uploadFileDetailsResponse = new ErrorUploadFileDetailsResponse();
+		if (StringUtils.isNotBlank(status) && !EnumUtils.isValidEnum(VendorInvoiceStatus.class, status)) {
+			uploadFileDetailsResponse.setStatus(FileManagementConstant.FAILURE);
+			uploadFileDetailsResponse.setStatus_code(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+			uploadFileDetailsResponse.setStatus_msg(status);
+			uploadFileDetailsResponse.setStatus_msg(String.format(FileManagementConstant.INVALID_STATUS, status));
+		} else {
+			List<ErrorUploadFileDetailsRest> uploadFileDetailsRestList = null;
+			Page<ErrorFileDetailsEntity> errorFileDetailsEntityPage = null;
+			if (StringUtils.isBlank(status)) {
+				errorFileDetailsEntityPage = errorFileDetailsRepo.findByImCodeAndIsErrorFile(imCode, isErrorFile, pageable);
+			} else {
+				errorFileDetailsEntityPage = errorFileDetailsRepo.findByStatusAndImCodeAndIsErrorFile(status, imCode,
+						isErrorFile, pageable);
+			}
+
+			if (CollectionUtils.isNotEmpty(errorFileDetailsEntityPage.getContent())) {
+				uploadFileDetailsRestList = errorFileDetailsEntityPage.getContent().stream()
+						.map(bup -> mapper.map(bup, ErrorUploadFileDetailsRest.class)).toList();
+				uploadFileDetailsResponse.setStatus_msg(FileManagementConstant.FILE_DTLS_FETCH_SUCCESS);
+			} else {
+				uploadFileDetailsResponse.setStatus_msg(FileManagementConstant.FILE_DTLS_DOESNOT_EXISTS);
+			}
+
+			ResponseMetadata metadata = new ResponseMetadata();
+			metadata.setElements(errorFileDetailsEntityPage.getTotalElements());
+			metadata.setTotalPages(errorFileDetailsEntityPage.getTotalPages());
+			metadata.setSize(errorFileDetailsEntityPage.getSize());
+			metadata.setPage(errorFileDetailsEntityPage.getNumber());
+			uploadFileDetailsResponse.setMetadata(metadata);
+			uploadFileDetailsResponse.setData(uploadFileDetailsRestList);
+			uploadFileDetailsResponse.setStatus(FileManagementConstant.SUCCESS);
+			uploadFileDetailsResponse.setStatus_code(String.valueOf(HttpStatus.OK.value()));
+		}
+
+		log.info("Exiting getReversalFileDetails of {}", this.getClass().getSimpleName());
+		return uploadFileDetailsResponse;
 	}
 
 	private Map<String, String> mapBulkUploadFields(String content, String delimiter, Map<String, String> configMap) {
@@ -356,28 +423,35 @@ public class VendorBulkInvoiceUploadServiceImpl implements VendorBulkInvoiceUplo
 		return contentMap;
 	}
 
-	private VendorTxnInvoiceRest mapToVendorTxnInvoiceRest(String imCode, Map<String, String> contentMap,
-			List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList,
-			List<VendorTxnInvoiceErrorRest> vendorTxnInvoiceErrorRestList) {
+	private VendorTxnInvoiceRest mapToVendorTxnInvoiceRest(Map<String, String> contentMap,
+			List<VendorTxnInvoiceRest> vendorTxnInvoiceRestList, Map<String, String> errorContentMap) {
 
 		log.info("Entering mapToVendorTxnInvoiceRest of {}", this.getClass().getSimpleName());
 
 		VendorTxnInvoiceRest vendorTxnInvoiceRest = objectMapper.convertValue(contentMap, VendorTxnInvoiceRest.class);
-		vendorTxnInvoiceRest.setImCode(imCode);
 		vendorTxnInvoiceRest.setStatus(VendorInvoiceStatus.PENDING_AUHTORIZATION);
 		
 		try {
 			vendorBulkUploadValidator.validateInvoiceDetails(vendorTxnInvoiceRest);
 			vendorTxnInvoiceRestList.add(vendorTxnInvoiceRest);
 		} catch (VendorBulkUploadException e) {
-			VendorTxnInvoiceErrorRest vendorTxnInvoiceErrorRest = new VendorTxnInvoiceErrorRest();
-			vendorTxnInvoiceErrorRest.setInvoiceNumber(vendorTxnInvoiceRest.getInvoiceNumber());
-			vendorTxnInvoiceErrorRest.setErrorDescription(e.getMessage());
-			vendorTxnInvoiceErrorRestList.add(vendorTxnInvoiceErrorRest);
+			errorContentMap.put(vendorTxnInvoiceRest.getInvoiceNumber(), e.getMessage());
 		}
-
+		
 		log.info("Exiting mapToVendorTxnInvoiceRest of {}", this.getClass().getSimpleName());
 		return vendorTxnInvoiceRest;
+	}
+	
+	private MultipartFile getMultipartFile(String filePath, String fileName, String fileType) throws VendorBulkUploadException{
+		try {
+			File file = new File(filePath, fileName);
+			DiskFileItem fileItem = new DiskFileItem("file", fileType, false, file.getName(),
+					(int) file.length(), file.getParentFile());
+			fileItem.getOutputStream();
+			return new CommonsMultipartFile(fileItem);
+		} catch (IOException e) {
+			throw new VendorBulkUploadException(ErrorCode.FILE_DOWNLOADING_ERROR);
+		}
 	}
 
 }
